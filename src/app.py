@@ -12,7 +12,8 @@ from components.sentiment_analysis import draw_sentiment_analysis_graph
 from components.heatmap import draw_heatmap_graph
 from components.word_frequency import draw_word_frequency_graph
 
-data = preprocess.load_data()
+raw_data = preprocess.load_data()
+data = preprocess.preprocess(raw_data)
 
 app = Dash(__name__, title="OVNI", external_stylesheets=[dbc.themes.LUX])
 app._favicon = "images/ufo.png"
@@ -104,9 +105,9 @@ body = dbc.Container(
                         dcc.Graph(
                             figure=draw_heatmap_graph(data),
                             id="density_month",
-                            style={"height": "100%"},
+                            style={"width": "100%"},
                         ),
-                        style={"height": "2000px", "border": "1px solid black"},
+                        style={"border": "1px solid black"},
                     ),
                 ]
             )
@@ -183,11 +184,9 @@ app.layout = dbc.Container([header, filter_box, body])
 def update_graphs(shape_filters: list[str], duration_filter: str, decade_filter: str):
     filtered_data = data.copy(deep=True)
 
-    """ 
-    filtered_data = preprocess.filter_by_shapes(data, shape_filters)
+    filtered_data = preprocess.filter_by_shapes(filtered_data, shape_filters)
     filtered_data = preprocess.filter_by_duration(filtered_data, duration_filter)
     filtered_data = preprocess.filter_by_decade(filtered_data, decade_filter)
-    """
 
     map = draw_map(filtered_data)
     word_frequency = draw_word_frequency_graph(filtered_data)

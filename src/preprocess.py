@@ -156,7 +156,7 @@ def convert_to_seconds(duration) -> float:
         return None
 
 
-def filter_by_shape(df: pd.DataFrame, shapes: list[str]) -> pd.DataFrame:
+def filter_by_shapes(df: pd.DataFrame, shapes: list[str]) -> pd.DataFrame:
 
     # Keys: subset of "light", "circle", "triangle", "fireball", "other"
 
@@ -193,26 +193,6 @@ def filter_by_decade(df: pd.DataFrame, decade: str = "Toutes") -> pd.DataFrame:
     return df[
         (df["date_time"].dt.year >= min_year) & (df["date_time"].dt.year <= max_year)
     ]
-
-
-def restructure_df(df: pd.DataFrame) -> pd.DataFrame:
-
-    # Create a deep copy of the df called yearly_df
-    yearly_df = df.copy()
-
-    # Create a new column called "year" that contains the year of the date_time column
-    yearly_df["year"] = yearly_df["date_time"].dt.year
-    yearly_df["month"] = yearly_df["date_time"].dt.month
-
-    # drop all columns except "year" and "month"
-    yearly_df = yearly_df[["year", "month"]]
-    yearly_df = yearly_df.groupby(["year", "month"]).size().reset_index(name="counts")
-
-    # Create a new df with rows = year, columns = month, values = count of observations
-    yearly_df = yearly_df.pivot(index="year", columns="month", values="counts")
-    yearly_df = yearly_df.fillna(0).astype(int)
-
-    return yearly_df
 
 
 def aggregate_by_hour(df: pd.DataFrame) -> pd.DataFrame:
