@@ -7,35 +7,123 @@ app = Dash(__name__, external_stylesheets=[dbc.themes.LUX])
 load_figure_template("LUX")
 
 # HTML Layout
-header = html.div(
+header = dbc.Container(
     [
         html.H1("Observation d'OVNI au états-unis"),
-        html.p("Simon Haché, Julien Milosz, Manel Keddam"),
-        filter_box_layout,
-    ]
+        html.P("Simon Haché, Julien Milosz, Manel Keddam"),
+    ],
+    style={"textAlign": "center", "margin": "40px"},
 )
 
-body = html.div(
+filter_box = dbc.Container(
+    filter_box_layout,
+    style={
+        "background-color": "lightgrey",
+        "position": "-webkit-sticky",
+        "position": "sticky",
+        "top": "0",
+        "margin-bottom": "50px",
+        "padding": "20px",
+        "width": "100%",
+    },
+)
+
+body = dbc.Container(
     [
-        dbc.Row(dbc.Col()),  # Carte
-        dbc.Row([dbc.Col(), dbc.Col()]),  # Mots fréquents + sentiment analysis
-        dbc.Row(dbc.Col()),  # Densité d'observation par mois
-        dbc.Row(dbc.Col()),  # Densité d'observation par heure
-        dbc.Row(dbc.Col()),  # Durée observations
-        dbc.Row(dbc.Col()),  # Événements culturels
+        dbc.Row(
+            dbc.Col(
+                [
+                    html.P("Carte", className="graph-title"),
+                    dbc.Container(
+                        children=[],
+                        style={"height": "500px", "border": "1px solid black"},
+                    ),
+                ]
+            )
+        ),  # Carte
+        dbc.Row(
+            [
+                dbc.Col(
+                    [
+                        html.P("Mots Fréquemments Utilisés", className="graph-title"),
+                        dbc.Container(
+                            children=[],
+                            style={"height": "200px", "border": "1px solid black"},
+                        ),
+                    ]
+                ),
+                dbc.Col(
+                    [
+                        html.P("Analyse de Sentiment", className="graph-title"),
+                        dbc.Container(
+                            children=[],
+                            style={"height": "200px", "border": "1px solid black"},
+                        ),
+                    ]
+                ),
+            ]
+        ),
+        dbc.Row(
+            dbc.Col(
+                [
+                    html.P(
+                        "Densité d'observations en fonction du mois",
+                        className="graph-title",
+                    ),
+                    dbc.Container(
+                        children=[],
+                        style={"height": "1000px", "border": "1px solid black"},
+                    ),
+                ]
+            )
+        ),  # Densité d'observation par mois
+        dbc.Row(
+            dbc.Col(
+                [
+                    html.P(
+                        "Densité d'observation par heure de la journée",
+                        className="graph-title",
+                    ),
+                    dbc.Container(
+                        children=[],
+                        style={"height": "200px", "border": "1px solid black"},
+                    ),
+                ]
+            )
+        ),  # Densité d'observation par heure
+        dbc.Row(
+            dbc.Col(
+                [
+                    html.P("Durée des observations", className="graph-title"),
+                    dbc.Container(
+                        children=[],
+                        style={"height": "200px", "border": "1px solid black"},
+                    ),
+                ]
+            )
+        ),  # Durée observations
+        dbc.Row(
+            dbc.Col(
+                [
+                    html.P(
+                        "Influence d'événements culturels marquants",
+                        className="graph-title",
+                    ),
+                    dbc.Container(
+                        children=[],
+                        style={"height": "200px", "border": "1px solid black"},
+                    ),
+                ]
+            )
+        ),  # Événements culturels
     ]
 )
 
 
-app.layout = html.div([header, body])
+app.layout = dbc.Container([header, filter_box, body])
 
 
 # Callbacks
-
-
-@callback(Output("graph-content", "figure"), Input("", "value"))
-def update_graph(value):
-    pass
 
 
 if __name__ == "__main__":
