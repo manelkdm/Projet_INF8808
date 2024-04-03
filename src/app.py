@@ -14,13 +14,15 @@ from components.word_frequency import draw_word_frequency_graph
 
 data = preprocess.load_data()
 
-app = Dash(__name__, external_stylesheets=[dbc.themes.LUX])
+app = Dash(__name__, title="OVNI", external_stylesheets=[dbc.themes.LUX])
+app._favicon = "images/ufo.png"
 load_figure_template("LUX")
 
 # HTML Layout
 header = dbc.Container(
     [
-        html.H1("Observation d'OVNI au états-unis"),
+        html.Img(src="assets/images/ufo.png", style={"height": "100px"}),
+        html.H1("Observations d'OVNI au états-unis"),
         html.P("Simon Haché, Julien Milosz, Manel Keddam"),
     ],
     style={"textAlign": "center", "margin": "40px"},
@@ -29,7 +31,7 @@ header = dbc.Container(
 filter_box = dbc.Container(
     filter_box_layout,
     style={
-        "background-color": "lightgrey",
+        "background-color": "DarkSeaGreen",
         "position": "-webkit-sticky",
         "position": "sticky",
         "top": "5px",
