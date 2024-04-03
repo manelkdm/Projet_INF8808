@@ -32,11 +32,12 @@ filter_box = dbc.Container(
         "background-color": "lightgrey",
         "position": "-webkit-sticky",
         "position": "sticky",
-        "top": "0",
-        "margin-bottom": "50px",
+        "top": "5px",
+        "marginBottom": "50px",
         "padding": "20px",
         "width": "100%",
         "z-index": "2",
+        "box-shadow": "5px 10px 5px Gainsboro",
     },
 )
 
@@ -180,7 +181,6 @@ app.layout = dbc.Container([header, filter_box, body])
 def update_graphs(shape_filters: list[str], duration_filter: str, decade_filter: str):
     filtered_data = data.copy(deep=True)
 
-    print(shape_filters, duration_filter, decade_filter)
     """ 
     filtered_data = preprocess.filter_by_shapes(data, shape_filters)
     filtered_data = preprocess.filter_by_duration(filtered_data, duration_filter)
