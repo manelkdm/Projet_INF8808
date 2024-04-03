@@ -7,7 +7,13 @@ shape_col = dbc.Container(
         html.H3("Forme"),
         dbc.Container(
             dbc.Checklist(
-                ["Lumière", "Cercle", "Triangle", "Boule de feu", "Autres"],
+                [
+                    {"value": "light", "label": "Lumière"},
+                    {"value": "circle", "label": "Cercle"},
+                    {"value": "triangle", "label": "Triangle"},
+                    {"value": "fireball", "label": "Boule de feu"},
+                    {"value": "others", "label": "Autres"},
+                ],
                 [],
                 id="shape_filter",
             ),
@@ -19,8 +25,12 @@ duration_col = dbc.Container(
     [
         html.H3("Durée"),
         dbc.RadioItems(
-            ["Courte (< 1 minute)", "Longue (> 1 minute)", "Toutes"],
-            "Toutes",
+            [
+                {"label": "Courte (< 1 minute)", "value": "short"},
+                {"label": "Longue (> 1 minute)", "value": "long"},
+                {"label": "Toutes", "value": "all"},
+            ],
+            "all",
             id="duration_filter",
         ),
     ]

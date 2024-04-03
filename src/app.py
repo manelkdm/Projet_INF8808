@@ -2,6 +2,17 @@ from dash import Dash, html, dcc, callback, Output, Input
 from dash_bootstrap_templates import load_figure_template
 import dash_bootstrap_components as dbc
 from components.filter_box import filter_box_layout
+import preprocess
+
+from components.map import draw_map
+from components.cultural_events import draw_cultural_events_graph
+from components.density_by_hour import draw_density_by_hour_graph
+from components.duration import draw_duration_graph
+from components.sentiment_analysis import draw_sentiment_analysis_graph
+from components.heatmap import draw_heatmap_graph
+from components.word_frequency import draw_word_frequency_graph
+
+data = preprocess.load_data()
 
 app = Dash(__name__, external_stylesheets=[dbc.themes.LUX])
 load_figure_template("LUX")
@@ -25,6 +36,7 @@ filter_box = dbc.Container(
         "margin-bottom": "50px",
         "padding": "20px",
         "width": "100%",
+        "z-index": "2",
     },
 )
 
@@ -35,20 +47,31 @@ body = dbc.Container(
                 [
                     html.P("Carte", className="graph-title"),
                     dbc.Container(
-                        children=[],
-                        style={"height": "500px", "border": "1px solid black"},
+                        dcc.Graph(
+                            figure=draw_map(data),
+                            id="map",
+                            style={"height": "100%"},
+                        ),
+                        style={"height": "1000px", "border": "1px solid black"},
                     ),
                 ]
             )
-        ),  # Carte
+        ),
         dbc.Row(
             [
                 dbc.Col(
                     [
-                        html.P("Mots Fréquemments Utilisés", className="graph-title"),
+                        html.P(
+                            "Mots Fréquemments Utilisés",
+                            className="graph-title",
+                        ),
                         dbc.Container(
-                            children=[],
-                            style={"height": "200px", "border": "1px solid black"},
+                            dcc.Graph(
+                                figure=draw_word_frequency_graph(data),
+                                id="word_frequency",
+                                style={"height": "100%"},
+                            ),
+                            style={"height": "500px", "border": "1px solid black"},
                         ),
                     ]
                 ),
@@ -56,8 +79,12 @@ body = dbc.Container(
                     [
                         html.P("Analyse de Sentiment", className="graph-title"),
                         dbc.Container(
-                            children=[],
-                            style={"height": "200px", "border": "1px solid black"},
+                            dcc.Graph(
+                                figure=draw_sentiment_analysis_graph(data),
+                                id="sentiment",
+                                style={"height": "100%"},
+                            ),
+                            style={"height": "500px", "border": "1px solid black"},
                         ),
                     ]
                 ),
@@ -71,12 +98,16 @@ body = dbc.Container(
                         className="graph-title",
                     ),
                     dbc.Container(
-                        children=[],
-                        style={"height": "1000px", "border": "1px solid black"},
+                        dcc.Graph(
+                            figure=draw_heatmap_graph(data),
+                            id="density_month",
+                            style={"height": "100%"},
+                        ),
+                        style={"height": "2000px", "border": "1px solid black"},
                     ),
                 ]
             )
-        ),  # Densité d'observation par mois
+        ),
         dbc.Row(
             dbc.Col(
                 [
@@ -85,23 +116,31 @@ body = dbc.Container(
                         className="graph-title",
                     ),
                     dbc.Container(
-                        children=[],
-                        style={"height": "200px", "border": "1px solid black"},
+                        dcc.Graph(
+                            figure=draw_density_by_hour_graph(data),
+                            id="density_hour",
+                            style={"height": "100%"},
+                        ),
+                        style={"height": "500px", "border": "1px solid black"},
                     ),
                 ]
             )
-        ),  # Densité d'observation par heure
+        ),
         dbc.Row(
             dbc.Col(
                 [
                     html.P("Durée des observations", className="graph-title"),
                     dbc.Container(
-                        children=[],
-                        style={"height": "200px", "border": "1px solid black"},
+                        dcc.Graph(
+                            figure=draw_duration_graph(data),
+                            id="duration",
+                            style={"height": "100%"},
+                        ),
+                        style={"height": "500px", "border": "1px solid black"},
                     ),
                 ]
             )
-        ),  # Durée observations
+        ),
         dbc.Row(
             dbc.Col(
                 [
@@ -110,20 +149,61 @@ body = dbc.Container(
                         className="graph-title",
                     ),
                     dbc.Container(
-                        children=[],
-                        style={"height": "200px", "border": "1px solid black"},
+                        dcc.Graph(
+                            figure=draw_cultural_events_graph(data),
+                            id="events",
+                            style={"height": "100%"},
+                        ),
+                        style={"height": "500px", "border": "1px solid black"},
                     ),
                 ]
             )
-        ),  # Événements culturels
+        ),
     ]
 )
-
 
 app.layout = dbc.Container([header, filter_box, body])
 
 
-# Callbacks
+@app.callback(
+    Output("map", "figure"),
+    Output("word_frequency", "figure"),
+    Output("sentiment", "figure"),
+    Output("density_month", "figure"),
+    Output("density_hour", "figure"),
+    Output("duration", "figure"),
+    Output("events", "figure"),
+    Input("shape_filter", "value"),
+    Input("duration_filter", "value"),
+    Input("decade_filter", "value"),
+)
+def update_graphs(shape_filters: list[str], duration_filter: str, decade_filter: str):
+    filtered_data = data.copy(deep=True)
+
+    print(shape_filters, duration_filter, decade_filter)
+    """ 
+    filtered_data = preprocess.filter_by_shapes(data, shape_filters)
+    filtered_data = preprocess.filter_by_duration(filtered_data, duration_filter)
+    filtered_data = preprocess.filter_by_decade(filtered_data, decade_filter)
+    """
+
+    map = draw_map(filtered_data)
+    word_frequency = draw_word_frequency_graph(filtered_data)
+    sentiment = draw_sentiment_analysis_graph(filtered_data)
+    density_month = draw_heatmap_graph(filtered_data)
+    density_hour = draw_density_by_hour_graph(filtered_data)
+    duration = draw_duration_graph(filtered_data)
+    events = draw_cultural_events_graph(filtered_data)
+
+    return (
+        map,
+        word_frequency,
+        sentiment,
+        density_month,
+        density_hour,
+        duration,
+        events,
+    )
 
 
 if __name__ == "__main__":

@@ -161,3 +161,4 @@ cython_debug/
 #.idea/
 
 /src/assets/data/nuforc_reports.csv
+.DS_Store
