@@ -1,13 +1,16 @@
 import plotly.graph_objects as go
 import plotly.express as px
 import pandas as pd
-
+import matplotlib.colors as mcolors
+import colorsys
 
 def draw_heatmap_graph(df) -> go.Figure:
 
     monthly_density = restructure_df(df)
 
-    fig = px.imshow(monthly_density)
+    gradient = create_gradient_from_color("#8fbc8f", 10)
+
+    fig = px.imshow(monthly_density, color_continuous_scale=gradient)
 
     fig.update_layout(
         xaxis=dict(
@@ -53,3 +56,16 @@ def restructure_df(df: pd.DataFrame) -> pd.DataFrame:
     yearly_df = yearly_df.fillna(0).astype(int)
 
     return yearly_df
+
+
+def create_gradient_from_color(color, levels):
+    hex_color = mcolors.hex2color(color)  # Convert hex to rgb
+    hsv_color = colorsys.rgb_to_hsv(*hex_color)  # Convert rgb to hsv
+
+    gradient = []
+    for i in range(levels):
+        lightness = (i / levels)
+        rgb_color = colorsys.hsv_to_rgb(hsv_color[0], hsv_color[1], lightness)
+        gradient.append(mcolors.rgb2hex(rgb_color))  # Convert rgb back to hex
+
+    return gradient
