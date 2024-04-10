@@ -12,7 +12,7 @@ shape_col = dbc.Container(
                     {"value": "circle", "label": "Cercle"},
                     {"value": "triangle", "label": "Triangle"},
                     {"value": "fireball", "label": "Boule de feu"},
-                    {"value": "others", "label": "Autres"},
+                    {"value": "other", "label": "Autres"},
                 ],
                 [],
                 id="shape_filter",

@@ -56,6 +56,7 @@ body = dbc.Container(
                             figure=draw_map(data),
                             id="map",
                             style={"height": "100%"},
+                            config=dict(scrollZoom=False),
                         ),
                         style={"height": "1000px", "border": "1px solid black"},
                     ),
