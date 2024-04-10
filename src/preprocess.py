@@ -1,8 +1,39 @@
 import pandas as pd
+from textblob import TextBlob
+import nltk
+from nltk.corpus import stopwords
+from nltk.tokenize import word_tokenize
 
+# VERSION 2.0
+# nltk.download("punkt")
+# nltk.download("stopwords")
+# nltk.download("wordnet")
+
+# stop_words = set(stopwords.words('english'))
+
+# def init_nlkt():
+#     nltk.download("punkt")
+#     nltk.download("stopwords")
+#     nltk.download("wordnet")
+
+#     stop_words = set(stopwords.words('english'))
+#     return stop_words
 
 def load_data(file_path="src/assets/data/nuforc_reports.csv") -> pd.DataFrame:
     return pd.read_csv(file_path)
+
+
+# VERION 2.0
+# def preprocess_and_analyze_sentiment(text):
+
+#     # Tokenize the text and remove stop words
+#     words = word_tokenize(text)
+#     filtered_words = [word for word in words if word.lower() not in stop_words]
+#     filtered_text = ' '.join(filtered_words)
+    
+#     # Perform sentiment analysis using TextBlob
+#     blob = TextBlob(filtered_text)
+#     return blob.sentiment.polarity
 
 
 def preprocess(df: pd.DataFrame) -> pd.DataFrame:
@@ -42,6 +73,31 @@ def preprocess(df: pd.DataFrame) -> pd.DataFrame:
     primary_shapes = ["light", "circle", "triangle", "fireball"]
     df["shape"] = df["shape"].apply(lambda x: x.lower())
     df["shape"] = df["shape"].apply(lambda x: x if x in primary_shapes else "other")
+
+    # TODO : this shit is too long ... we will do it offline and save the CSV
+    # Perform sentiment analysis on the summary column
+
+    # VERSION 1.0
+    df["sentiment"] = df["summary"].apply(lambda x: TextBlob(x).sentiment.polarity)
+
+    # VERSION 2.0
+    # df['sentiment'] = df['summary'].apply(preprocess_and_analyze_sentiment)
+
+    # Apply a threshold to the sentiment column, splitting it into three categories
+    # [-1, -T] -> "negative"
+    # (-T, +T) -> "neutral"
+    # (+T, 1] -> "positive"
+
+    def categorize_sentiment(s: float, treshold = 0.10) -> str:
+        if s <= -treshold:
+            return "négative"
+        if s >= treshold:
+            return "positive"
+        
+        return "neutre"
+
+    
+    df["sentiment"] = df["sentiment"].apply(lambda x: categorize_sentiment(x))
 
     return df
 
