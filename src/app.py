@@ -16,6 +16,7 @@ raw_data = preprocess.load_data()
 data = preprocess.preprocess(raw_data)
 
 app = Dash(__name__, title="OVNI", external_stylesheets=[dbc.themes.LUX])
+server = app.server
 app._favicon = "images/ufo.png"
 load_figure_template("LUX")
 
