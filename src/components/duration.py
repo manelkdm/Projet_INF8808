@@ -3,7 +3,7 @@ import plotly.express as px
 import pandas as pd
 
 
-def draw_duration_graph(df) -> go.Figure:
+def draw_duration_graph(df: pd.DataFrame) -> go.Figure:
 
     duration_df = restructure_df(df)
 
@@ -14,16 +14,13 @@ def draw_duration_graph(df) -> go.Figure:
         color_discrete_sequence=["#8fbc8f"],
     )
 
-    max_duration = int(duration_df['duration'].max())
-    tick_values = list(range(0, max_duration+1, 60))
+    max_duration = int(duration_df["duration"].max())
+    tick_values = list(range(0, max_duration + 1, 60))
 
     fig.update_layout(
         xaxis_title_text="Durées (secondes)",
         yaxis_title_text="Nombre d'observations",
-        xaxis=dict(
-            tickmode='array',
-            tickvals=tick_values
-        )
+        xaxis=dict(tickmode="array", tickvals=tick_values),
     )
 
     return fig
