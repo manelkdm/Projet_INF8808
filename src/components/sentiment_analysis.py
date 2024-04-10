@@ -3,26 +3,26 @@ import plotly.express as px
 
 import pandas as pd
 
+
 def draw_sentiment_analysis_graph(df) -> go.Figure:
 
     sentiment_df = restructure_df(df)
 
     color_map = {
-        "positive": "#8fbc8f",
-        "négative": "#bc8f8f",
+        "positif": "#8fbc8f",
+        "négatif": "#bc8f8f",
         "neutre": "grey",
-    }   
+    }
 
     fig = px.pie(
-        sentiment_df, 
-        names="sentiment", 
+        sentiment_df,
+        names="sentiment",
         values="count",
         color="sentiment",
-        color_discrete_map=color_map
+        color_discrete_map=color_map,
     )
 
     return fig
-
 
 
 def restructure_df(df: pd.DataFrame) -> pd.DataFrame:

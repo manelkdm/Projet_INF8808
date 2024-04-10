@@ -12,8 +12,12 @@ from components.sentiment_analysis import draw_sentiment_analysis_graph
 from components.heatmap import draw_heatmap_graph
 from components.word_frequency import draw_word_frequency_graph
 
-raw_data = preprocess.load_data()
-data = preprocess.preprocess(raw_data)
+# Working version
+# raw_data = preprocess.load_raw_data()
+# data = preprocess.preprocess(raw_data)
+
+# Load data
+data = preprocess.load_data()
 
 app = Dash(__name__, title="OVNI", external_stylesheets=[dbc.themes.LUX])
 server = app.server

@@ -4,23 +4,17 @@ import nltk
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 import zipfile
+import csv
 
 # VERSION 2.0
 # nltk.download("punkt")
 # nltk.download("stopwords")
 # nltk.download("wordnet")
 
-# stop_words = set(stopwords.words('english'))
+stop_words = set(stopwords.words("english"))
 
-# def init_nlkt():
-#     nltk.download("punkt")
-#     nltk.download("stopwords")
-#     nltk.download("wordnet")
 
-#     stop_words = set(stopwords.words('english'))
-#     return stop_words
-
-def load_data(zip_file_path="src/assets/data/nuforc_reports.zip") -> pd.DataFrame:
+def load_raw_data(zip_file_path="src/assets/data/nuforc_reports.zip") -> pd.DataFrame:
     # unzip the file
     with zipfile.ZipFile(zip_file_path, "r") as z:
         z.extractall("src/assets/data")
@@ -29,17 +23,37 @@ def load_data(zip_file_path="src/assets/data/nuforc_reports.zip") -> pd.DataFram
     return pd.read_csv(file_path)
 
 
-# VERION 2.0
-# def preprocess_and_analyze_sentiment(text):
+def load_data() -> pd.DataFrame:
 
-#     # Tokenize the text and remove stop words
-#     words = word_tokenize(text)
-#     filtered_words = [word for word in words if word.lower() not in stop_words]
-#     filtered_text = ' '.join(filtered_words)
-    
-#     # Perform sentiment analysis using TextBlob
-#     blob = TextBlob(filtered_text)
-#     return blob.sentiment.polarity
+    # load the data
+    df = pd.read_csv("src/assets/data/processed_data.csv")
+
+    df["date_time"] = pd.to_datetime(df["date_time"], errors="coerce")
+
+    # Convert "summary" to string
+    df["summary"] = df["summary"].astype(str)
+
+    # Convert duration to int
+    df["duration"] = df["duration"].astype(int)
+
+    return df
+
+
+def remove_stop_words(text: str) -> str:
+    words = word_tokenize(text)
+
+    # remove punctuation
+
+    filtered_words = [
+        word for word in words if word.lower() not in stop_words and word.isalpha()
+    ]
+
+    return " ".join(filtered_words)
+
+
+def sentiment_polarity(text: str) -> str:
+    blob = TextBlob(text)
+    return blob.sentiment.polarity
 
 
 def preprocess(df: pd.DataFrame) -> pd.DataFrame:
@@ -57,7 +71,7 @@ def preprocess(df: pd.DataFrame) -> pd.DataFrame:
             "date_time",
             "shape",
             "duration",
-            "text",
+            # "text",
             "city_latitude",
             "city_longitude",
         ]
@@ -80,11 +94,16 @@ def preprocess(df: pd.DataFrame) -> pd.DataFrame:
     df["shape"] = df["shape"].apply(lambda x: x.lower())
     df["shape"] = df["shape"].apply(lambda x: x if x in primary_shapes else "other")
 
+    # Sentiment analysis
+
+    # Remove all stop words from the summary column
+    df["summary"] = df["summary"].apply(remove_stop_words)
+
     # TODO : this shit is too long ... we will do it offline and save the CSV
     # Perform sentiment analysis on the summary column
 
     # VERSION 1.0
-    df["sentiment"] = df["summary"].apply(lambda x: TextBlob(x).sentiment.polarity)
+    df["sentiment"] = df["summary"].apply(sentiment_polarity)
 
     # VERSION 2.0
     # df['sentiment'] = df['summary'].apply(preprocess_and_analyze_sentiment)
@@ -94,16 +113,19 @@ def preprocess(df: pd.DataFrame) -> pd.DataFrame:
     # (-T, +T) -> "neutral"
     # (+T, 1] -> "positive"
 
-    def categorize_sentiment(s: float, treshold = 0.10) -> str:
+    def categorize_sentiment(s: float, treshold=0.10) -> str:
         if s <= -treshold:
-            return "négative"
+            return "négatif"
         if s >= treshold:
-            return "positive"
-        
+            return "positif"
+
         return "neutre"
 
-    
     df["sentiment"] = df["sentiment"].apply(lambda x: categorize_sentiment(x))
+
+    # save to src/assets/data/processed_data.csv
+
+    df.to_csv("src/assets/data/processed_data.csv", quoting=csv.QUOTE_STRINGS)
 
     return df
 
@@ -246,9 +268,13 @@ def filter_by_duration(df: pd.DataFrame, duration: str = "all"):
 
 def filter_by_decade(df: pd.DataFrame, decade: str = "Toutes") -> pd.DataFrame:
 
-    # Keys : "1990" OR "2000" OR "2010" OR "Toutes"
+    # Keys : "Pre-1990" OR "1990" OR "2000" OR "2010" OR "Toutes"
+
     if decade == "Toutes":
         return df
+
+    if decade == "Pre-1990":
+        return df[df["date_time"].dt.year < 1990]
 
     min_year = int(decade)
     max_year = min_year + 9
@@ -269,25 +295,3 @@ def aggregate_by_hour(df: pd.DataFrame) -> pd.DataFrame:
     hourly_df = hourly_df.groupby("hour").size().reset_index(name="counts")
 
     return hourly_df
-
-
-if __name__ == "__main__":
-    df = load_data()
-    df = preprocess(df)
-
-    print(df.shape)
-    print(df.dtypes)
-
-    print("-" * 120)
-    hdf = aggregate_by_hour(df)
-
-    print(hdf)
-
-    # print unique values of the column "shape"
-    # print(df["shape"].unique())
-
-    # Print the first 5 values of the column date_time
-    # print(df["date_time"].head(50))
-
-    # Print the unique cities of the country called "U"
-    # print(df[df["country"] == "U"]["summary"])
