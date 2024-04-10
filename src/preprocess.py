@@ -3,6 +3,7 @@ from textblob import TextBlob
 import nltk
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
+import zipfile
 
 # VERSION 2.0
 # nltk.download("punkt")
@@ -19,7 +20,12 @@ from nltk.tokenize import word_tokenize
 #     stop_words = set(stopwords.words('english'))
 #     return stop_words
 
-def load_data(file_path="src/assets/data/nuforc_reports.csv") -> pd.DataFrame:
+def load_data(zip_file_path="src/assets/data/nuforc_reports.zip") -> pd.DataFrame:
+    # unzip the file
+    with zipfile.ZipFile(zip_file_path, "r") as z:
+        z.extractall("src/assets/data")
+
+    file_path = "src/assets/data/nuforc_reports.csv"
     return pd.read_csv(file_path)
 
 
