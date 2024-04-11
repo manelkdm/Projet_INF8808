@@ -27,7 +27,7 @@ def load_raw_data(zip_file_path="src/assets/data/nuforc_reports.zip") -> pd.Data
 def load_data() -> pd.DataFrame:
 
     # load the data
-    df = pd.read_csv("src/assets/data/processed_data.csv")
+    df = pd.read_csv("assets/data/processed_data.csv")
 
     df["date_time"] = pd.to_datetime(df["date_time"], errors="coerce")
 
