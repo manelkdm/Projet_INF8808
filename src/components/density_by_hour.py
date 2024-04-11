@@ -42,12 +42,6 @@ def draw_density_by_hour_graph(df) -> go.Figure:
         yref="paper",
     )
 
-    # TODO : check of exists ...
-    # fig.update_polar(
-    #     radialaxis_title="Nombre d'observations",
-    #     angularaxis_title="Heure de la journée"
-    # )
-
     return fig
 
 
