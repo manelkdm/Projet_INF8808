@@ -7,6 +7,12 @@ def draw_cultural_events_graph(df: pd.DataFrame, events_db: pd.DataFrame) -> go.
 
     cultural_events_df = restructure_df(df)
 
+    min_year = df['date_time'].dt.year.min()
+    max_year = df['date_time'].dt.year.max()
+
+    year_range = max_year - min_year
+    # print(f"Year range: {year_range}")
+
     # Convert date_time to string to be JSON serializable when plotting
     cultural_events_df["date_time"] = cultural_events_df["date_time"].astype(str)
 
@@ -30,8 +36,6 @@ def draw_cultural_events_graph(df: pd.DataFrame, events_db: pd.DataFrame) -> go.
     y_max = max(cultural_events_df["count"])
     fig.update_yaxes(range=[0, 1.2 * y_max ])
 
-    # add a horzinotal line at the maximum value, red, width 2
-    # fig.add_hline(y=y_max, line_dash="dot", line_color="red", line_width=2)
 
     event_category_colormap = {
         "Film/Série": "deepskyblue",
@@ -57,14 +61,21 @@ def draw_cultural_events_graph(df: pd.DataFrame, events_db: pd.DataFrame) -> go.
         )
 
         # TODO : solve this properly
-        # text_length = len(row["name"])
         y_coord = 0.9 * y_max
 
         # Pad the text with spaces to make it appear at the right position
         text_str = row["name"].rjust(30)
 
-        #print(f"New text: {text_str}")
-        # print(f"Text length: {text_length:<4}, y_max: {y_max:<4}, y_coord: {y_coord:<4}")
+        if year_range < 3: # 2020 - 2023 : tick every 3 months
+            fig.update_xaxes(dtick="M3", tickformat="%b %Y")
+        elif year_range < 10: # Decade : tick every 1 year
+            fig.update_xaxes(dtick="M12", tickformat="%Y")
+        else: # All : tick every 3 years
+            # TODO : tick every 3 years not possible in Plotly ...
+            pass
+            # fig.update_xaxes(dtick="M12", tickformat="%Y")
+
+        fig.update_xaxes(tickangle=90)
 
         fig.add_annotation(
             x=date_mid, y=y_coord,
