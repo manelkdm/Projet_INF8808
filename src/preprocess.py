@@ -1,18 +1,12 @@
 import pandas as pd
 from textblob import TextBlob
 import nltk
-nltk.download('stopwords')
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
+from nltk.stem import WordNetLemmatizer
 import zipfile
 import csv
-
-# VERSION 2.0
-# nltk.download("punkt")
-# nltk.download("stopwords")
-# nltk.download("wordnet")
-
-stop_words = set(stopwords.words("english"))
+import os
 
 
 def load_raw_data(zip_file_path="src/assets/data/nuforc_reports.zip") -> pd.DataFrame:
@@ -27,27 +21,30 @@ def load_raw_data(zip_file_path="src/assets/data/nuforc_reports.zip") -> pd.Data
 def load_data() -> pd.DataFrame:
 
     # load the data
-    df = pd.read_csv("assets/data/processed_data.csv")
+    df = pd.read_csv("src/assets/data/processed_data.csv")
 
+    # Convert columns to the right type
     df["date_time"] = pd.to_datetime(df["date_time"], errors="coerce")
-
-    # Convert "summary" to string
     df["summary"] = df["summary"].astype(str)
-
-    # Convert duration to int
     df["duration"] = df["duration"].astype(int)
 
     return df
 
+def load_events() -> pd.DataFrame:
 
-def remove_stop_words(text: str) -> str:
+    events_db = pd.read_csv("src/assets/data/events.csv")
+    return events_db
+
+
+def preprocess_raw_text(text: str, stop_words, lemmatizer) -> str:
+
+    # Preprocess the text
     words = word_tokenize(text)
+    words = [w.lower() for w in words]
+    filtered_words = [w for w in words if w.lower() not in stop_words and w.isalpha()]
 
-    # remove punctuation
-
-    filtered_words = [
-        word for word in words if word.lower() not in stop_words and word.isalpha()
-    ]
+    # Lemmatize the words
+    filtered_words = [lemmatizer.lemmatize(w) for w in filtered_words]
 
     return " ".join(filtered_words)
 
@@ -57,7 +54,20 @@ def sentiment_polarity(text: str) -> str:
     return blob.sentiment.polarity
 
 
+def categorize_sentiment(s: float, treshold=0.05) -> str:
+    if s <= -treshold:
+        return "négatif"
+    if s >= treshold:
+        return "positif"
+
+    return "neutre"
+
+
 def preprocess(df: pd.DataFrame) -> pd.DataFrame:
+
+    # download the stopwords
+    nltk.download('stopwords')
+    stop_words = set(stopwords.words("english"))
 
     # drop the rows with missing values
     df = df.dropna()
@@ -98,35 +108,24 @@ def preprocess(df: pd.DataFrame) -> pd.DataFrame:
     # Sentiment analysis
 
     # Remove all stop words from the summary column
-    df["summary"] = df["summary"].apply(remove_stop_words)
-
-    # TODO : this shit is too long ... we will do it offline and save the CSV
-    # Perform sentiment analysis on the summary column
-
-    # VERSION 1.0
+    lemmatizer = WordNetLemmatizer()
+    df["summary"] = df["summary"].apply(preprocess_raw_text, stop_words=stop_words, lemmatizer=lemmatizer)
     df["sentiment"] = df["summary"].apply(sentiment_polarity)
-
-    # VERSION 2.0
-    # df['sentiment'] = df['summary'].apply(preprocess_and_analyze_sentiment)
 
     # Apply a threshold to the sentiment column, splitting it into three categories
     # [-1, -T] -> "negative"
     # (-T, +T) -> "neutral"
     # (+T, 1] -> "positive"
-
-    def categorize_sentiment(s: float, treshold=0.10) -> str:
-        if s <= -treshold:
-            return "négatif"
-        if s >= treshold:
-            return "positif"
-
-        return "neutre"
-
     df["sentiment"] = df["sentiment"].apply(lambda x: categorize_sentiment(x))
 
-    # save to src/assets/data/processed_data.csv
+    # Save the processed CSV to assets/data
 
-    df.to_csv("src/assets/data/processed_data.csv", quoting=csv.QUOTE_STRINGS)
+    # delete if exists
+    if os.path.exists("src/assets/data/processed_data.csv"):
+        os.remove("src/assets/data/processed_data.csv")
+
+    df.to_csv("src/assets/data/processed_data.csv", quoting=csv.QUOTE_NONNUMERIC)
+    print(">>> Data has been processed and saved to src/assets/data/processed_data.csv")
 
     return df
 

@@ -12,12 +12,15 @@ from components.sentiment_analysis import draw_sentiment_analysis_graph
 from components.heatmap import draw_heatmap_graph
 from components.word_frequency import draw_word_frequency_graph
 
-# Working version
-# raw_data = preprocess.load_raw_data()
-# data = preprocess.preprocess(raw_data)
+RUN_PREPROCESS = False
 
-# Load data
-data = preprocess.load_data()
+if RUN_PREPROCESS:
+    raw_data = preprocess.load_raw_data()
+    data = preprocess.preprocess(raw_data)
+else:
+    data = preprocess.load_data()
+
+events_db = preprocess.load_events()
 
 app = Dash(__name__, title="OVNI", external_stylesheets=[dbc.themes.LUX])
 server = app.server
@@ -160,7 +163,7 @@ body = dbc.Container(
                     ),
                     dbc.Container(
                         dcc.Graph(
-                            figure=draw_cultural_events_graph(data),
+                            figure=draw_cultural_events_graph(data, events_db),
                             id="events",
                             style={"height": "100%"},
                         ),
@@ -200,7 +203,7 @@ def update_graphs(shape_filters: list[str], duration_filter: str, decade_filter:
     density_month = draw_heatmap_graph(filtered_data)
     density_hour = draw_density_by_hour_graph(filtered_data)
     duration = draw_duration_graph(filtered_data)
-    events = draw_cultural_events_graph(filtered_data)
+    events = draw_cultural_events_graph(filtered_data, events_db)
 
     return (
         map,

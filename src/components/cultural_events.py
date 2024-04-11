@@ -1,9 +1,9 @@
 import plotly.graph_objects as go
 import pandas as pd
 import plotly.express as px
+from datetime import datetime, timedelta
 
-
-def draw_cultural_events_graph(df) -> go.Figure:
+def draw_cultural_events_graph(df: pd.DataFrame, events_db: pd.DataFrame) -> go.Figure:
 
     cultural_events_df = restructure_df(df)
 
@@ -27,37 +27,57 @@ def draw_cultural_events_graph(df) -> go.Figure:
         yaxis_title_text="Nombre d'observations",
     )
 
-    events_db = pd.read_csv("./assets/data/events.csv")
+    y_max = max(cultural_events_df["count"])
+    fig.update_yaxes(range=[0, 1.2 * y_max ])
 
-    color_map = {
-        "Movie": "lightblue",
-        "Space": "lightgreen",
-        "Other": "lightcoral",
+    # add a horzinotal line at the maximum value, red, width 2
+    # fig.add_hline(y=y_max, line_dash="dot", line_color="red", line_width=2)
+
+    event_category_colormap = {
+        "Film/Série": "deepskyblue",
+        "Mission Spatiale": "darkviolet",
+        "Autres": "grey",
     }
 
     for i in range(len(events_db)):
         row = events_db.iloc[i]
 
+        date_start = row["from"]
+        date_end = row["to"]
+        date_mid = get_mid_date(row)
+        color = event_category_colormap[row["category"]]
+
         # Skip iteration if the date is out of the range
-        if row["from"] < min_date or row["to"] > max_date:
+        if date_start < min_date or date_end > max_date:
             continue
         fig.add_vrect(
-            x0=row["from"], x1=row["to"],
-            fillcolor=color_map[row["category"]], opacity=0.5,
+            x0=date_start, x1=date_end,
+            fillcolor=color, opacity=0.5,
             layer="below", line_width=0,
         )
 
         # TODO : solve this properly
-        # fig.add_annotation(
-        #     x=row["from"], y=0,
-        #     xref="x", yref="paper",
-        #     text=row["category"],
-        #     showarrow=False,
-        #     font=dict(size=12),
-        # )
+        # text_length = len(row["name"])
+        y_coord = 0.9 * y_max
+
+        # Pad the text with spaces to make it appear at the right position
+        text_str = row["name"].rjust(30)
+
+        #print(f"New text: {text_str}")
+        # print(f"Text length: {text_length:<4}, y_max: {y_max:<4}, y_coord: {y_coord:<4}")
+
+        fig.add_annotation(
+            x=date_mid, y=y_coord,
+            xref="x", yref="y",
+            text=text_str,
+            showarrow=False,
+            font=dict(size=12),
+            textangle=-90,
+            align="right",
+        )
 
     # Add dummy traces for legend
-    for category, color in color_map.items():
+    for category, color in event_category_colormap.items():
         fig.add_trace(go.Scatter(
             x=[None], y=[None],
             mode='markers',
@@ -75,3 +95,15 @@ def restructure_df(df: pd.DataFrame) -> pd.DataFrame:
     cultural_events_df = cultural_events_df.groupby(cultural_events_df["date_time"].dt.to_period("M")).size().reset_index(name='count')
 
     return cultural_events_df
+
+
+def get_mid_date(row) -> datetime:
+    date_format = "%Y-%m-%d"
+
+    date_start = datetime.strptime(row["from"], date_format)
+    date_end = datetime.strptime(row["to"], date_format)
+
+    date_mid = date_start + (date_end - date_start) / 2
+
+
+    return date_mid
