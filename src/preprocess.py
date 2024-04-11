@@ -9,19 +9,19 @@ import csv
 import os
 
 
-def load_raw_data(zip_file_path="src/assets/data/nuforc_reports.zip") -> pd.DataFrame:
+def load_raw_data(zip_file_path="assets/data/nuforc_reports.zip") -> pd.DataFrame:
     # unzip the file
     with zipfile.ZipFile(zip_file_path, "r") as z:
-        z.extractall("src/assets/data")
+        z.extractall("assets/data")
 
-    file_path = "src/assets/data/nuforc_reports.csv"
+    file_path = "assets/data/nuforc_reports.csv"
     return pd.read_csv(file_path)
 
 
 def load_data() -> pd.DataFrame:
 
     # load the data
-    df = pd.read_csv("src/assets/data/processed_data.csv")
+    df = pd.read_csv("assets/data/processed_data.csv")
 
     # Convert columns to the right type
     df["date_time"] = pd.to_datetime(df["date_time"], errors="coerce")
@@ -32,7 +32,7 @@ def load_data() -> pd.DataFrame:
 
 def load_events() -> pd.DataFrame:
 
-    events_db = pd.read_csv("src/assets/data/events.csv")
+    events_db = pd.read_csv("assets/data/events.csv")
     return events_db
 
 
@@ -121,11 +121,11 @@ def preprocess(df: pd.DataFrame) -> pd.DataFrame:
     # Save the processed CSV to assets/data
 
     # delete if exists
-    if os.path.exists("src/assets/data/processed_data.csv"):
-        os.remove("src/assets/data/processed_data.csv")
+    if os.path.exists("assets/data/processed_data.csv"):
+        os.remove("assets/data/processed_data.csv")
 
-    df.to_csv("src/assets/data/processed_data.csv", quoting=csv.QUOTE_NONNUMERIC)
-    print(">>> Data has been processed and saved to src/assets/data/processed_data.csv")
+    df.to_csv("assets/data/processed_data.csv", quoting=csv.QUOTE_NONNUMERIC)
+    print(">>> Data has been processed and saved to assets/data/processed_data.csv")
 
     return df
 
