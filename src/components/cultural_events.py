@@ -13,23 +13,21 @@ def draw_cultural_events_graph(df) -> go.Figure:
     min_date = cultural_events_df["date_time"].min()
     max_date = cultural_events_df["date_time"].max()
 
-    fig = px.line(cultural_events_df, x="date_time", y="count")
+    fig = px.line(cultural_events_df, x='date_time', y='count')
 
-    fig.update_traces(line=dict(color="#8fbc8f", width=3))
+    fig.update_traces(
+    line=dict(
+        color="#8fbc8f",
+        width=3
+        )
+    )
 
     fig.update_layout(
         xaxis_title_text="Date",
         yaxis_title_text="Nombre d'observations",
     )
 
-    # TODO: This is a dummy example, remove it when we have the events DB
-    dummy_db = pd.DataFrame(
-        {
-            "from": ["2001-01-01", "2002-03-15", "2004-08-30"],
-            "to": ["2001-02-01", "2002-05-15", "2004-12-30"],
-            "category": ["Movie", "Space", "Other"],
-        }
-    )
+    events_db = pd.read_csv("./assets/data/events.csv")
 
     color_map = {
         "Movie": "lightblue",
@@ -37,20 +35,16 @@ def draw_cultural_events_graph(df) -> go.Figure:
         "Other": "lightcoral",
     }
 
-    for i in range(len(dummy_db)):
-        row = dummy_db.iloc[i]
+    for i in range(len(events_db)):
+        row = events_db.iloc[i]
 
         # Skip iteration if the date is out of the range
         if row["from"] < min_date or row["to"] > max_date:
             continue
-
         fig.add_vrect(
-            x0=row["from"],
-            x1=row["to"],
-            fillcolor=color_map[row["category"]],
-            opacity=0.5,
-            layer="below",
-            line_width=0,
+            x0=row["from"], x1=row["to"],
+            fillcolor=color_map[row["category"]], opacity=0.5,
+            layer="below", line_width=0,
         )
 
         # TODO : solve this properly
@@ -64,16 +58,13 @@ def draw_cultural_events_graph(df) -> go.Figure:
 
     # Add dummy traces for legend
     for category, color in color_map.items():
-        fig.add_trace(
-            go.Scatter(
-                x=[None],
-                y=[None],
-                mode="markers",
-                marker=dict(size=10, color=color),
-                showlegend=True,
-                name=category,
-            )
-        )
+        fig.add_trace(go.Scatter(
+            x=[None], y=[None],
+            mode='markers',
+            marker=dict(size=10, color=color),
+            showlegend=True,
+            name=category,
+        ))
 
     return fig
 
@@ -81,10 +72,6 @@ def draw_cultural_events_graph(df) -> go.Figure:
 def restructure_df(df: pd.DataFrame) -> pd.DataFrame:
 
     cultural_events_df = df.copy()
-    cultural_events_df = (
-        cultural_events_df.groupby(cultural_events_df["date_time"].dt.to_period("M"))
-        .size()
-        .reset_index(name="count")
-    )
+    cultural_events_df = cultural_events_df.groupby(cultural_events_df["date_time"].dt.to_period("M")).size().reset_index(name='count')
 
     return cultural_events_df
