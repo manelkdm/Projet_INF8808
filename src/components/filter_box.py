@@ -41,7 +41,7 @@ decade_col = dbc.Container(
         html.H3("Décennie"),
         dbc.Container(
             dbc.RadioItems(
-                ["Pre-1990", "1990", "2000", "2010", "2020", "Toutes"],
+                ["Pre-1980", "1980", "1990", "2000", "2010", "2020", "Toutes"],
                 "Toutes",
                 id="decade_filter",
             ),

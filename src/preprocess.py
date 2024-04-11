@@ -268,13 +268,13 @@ def filter_by_duration(df: pd.DataFrame, duration: str = "all"):
 
 def filter_by_decade(df: pd.DataFrame, decade: str = "Toutes") -> pd.DataFrame:
 
-    # Keys : "Pre-1990" OR "1990" OR "2000" OR "2010" OR "Toutes"
+    # Keys : "Pre-1980" OR "1980" OR "1990" OR "2000" OR "2010" OR "Toutes"
 
     if decade == "Toutes":
         return df
 
-    if decade == "Pre-1990":
-        return df[df["date_time"].dt.year < 1990]
+    if decade == "Pre-1980":
+        return df[df["date_time"].dt.year < 1980]
 
     min_year = int(decade)
     max_year = min_year + 9

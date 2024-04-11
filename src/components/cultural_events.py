@@ -66,14 +66,15 @@ def draw_cultural_events_graph(df: pd.DataFrame, events_db: pd.DataFrame) -> go.
         # Pad the text with spaces to make it appear at the right position
         text_str = row["name"].rjust(30)
 
-        if year_range < 3: # 2020 - 2023 : tick every 3 months
-            fig.update_xaxes(dtick="M3", tickformat="%b %Y")
-        elif year_range < 10: # Decade : tick every 1 year
-            fig.update_xaxes(dtick="M12", tickformat="%Y")
-        else: # All : tick every 3 years
-            # TODO : tick every 3 years not possible in Plotly ...
-            pass
-            # fig.update_xaxes(dtick="M12", tickformat="%Y")
+        # TODO: play with the tick values to make it more readable
+        # if year_range < 3: # 2020 - 2023 : tick every 3 months
+        #     fig.update_xaxes(dtick="M3", tickformat="%b %Y")
+        # elif year_range < 10: # Decade : tick every 1 year
+        #     fig.update_xaxes(dtick="M12", tickformat="%Y")
+        # else: # All : tick every 3 years
+        #     # TODO : tick every 3 years not possible in Plotly ...
+        #     pass
+        #     # fig.update_xaxes(dtick="M12", tickformat="%Y")
 
         fig.update_xaxes(tickangle=90)
 
