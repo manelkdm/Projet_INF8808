@@ -12,7 +12,7 @@ def draw_map(df: pd.DataFrame) -> go.Figure:
 
     df_by_city.sort_values(by="count", ascending=False, inplace=True)
 
-    df_by_city = df_by_city[0:3000]
+    df_by_city = df_by_city[0:1500]
 
     fig = go.Figure()
 
