@@ -10,14 +10,13 @@ def draw_density_by_hour_graph(df) -> go.Figure:
     # The radius "r" can be any of the following: "frequency", "log_frequency", "sqrt_frequency"
 
     fig = px.bar_polar(
-    df,
-    r="frequency",
-    theta="angle",
-    color_discrete_sequence=["#8fbc8f"],
-    direction="clockwise",
-    start_angle=90,
-    # theta_unit="radians",  # This is ignored, but originally thought to control ticks, can't actually change theta ticks directly in px.bar_polar
-)
+        df,
+        r="frequency",
+        theta="angle",
+        color_discrete_sequence=["#8fbc8f"],
+        direction="clockwise",
+        start_angle=90,
+    )
 
     fig.update_layout(
         polar=dict(
@@ -25,9 +24,29 @@ def draw_density_by_hour_graph(df) -> go.Figure:
                 tickmode="array",
                 tickvals=np.arange(24) * 15,
                 ticktext=[str(i) for i in range(24)],
-            )
+            ),
+            radialaxis=dict(
+                title = dict(text="Nombre", font=dict(size=14)),
+                tickangle=90,
+            ),
         )
     )
+
+    fig.add_annotation(
+        text="Heure de la journée",
+        x=0.5,
+        y=1.15,
+        showarrow=False,
+        font=dict(size=14),
+        xref="paper",
+        yref="paper",
+    )
+
+    # TODO : check of exists ...
+    # fig.update_polar(
+    #     radialaxis_title="Nombre d'observations",
+    #     angularaxis_title="Heure de la journée"
+    # )
 
     return fig
 
