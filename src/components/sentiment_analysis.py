@@ -22,6 +22,18 @@ def draw_sentiment_analysis_graph(df) -> go.Figure:
         color_discrete_map=color_map,
     )
 
+    fig.add_annotation(
+        x=1.05,
+        y=1,
+        text="Sentiment",
+        showarrow=False,
+        xref="paper",
+        yref="paper",
+        xanchor="left",
+        yanchor="bottom",
+        font=dict(size=14)
+    )
+
     return fig
 
 

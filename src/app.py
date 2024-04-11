@@ -57,7 +57,7 @@ body = dbc.Container(
         dbc.Row(
             dbc.Col(
                 [
-                    html.P("Carte", className="graph-title"),
+                    html.P("Carte des États-Unis", className="graph-title"),
                     dbc.Container(
                         dcc.Graph(
                             figure=draw_map(data),
@@ -75,7 +75,7 @@ body = dbc.Container(
                 dbc.Col(
                     [
                         html.P(
-                            "Mots Fréquemments Utilisés",
+                            "Top 10 Mots Fréquemment Utilisés",
                             className="graph-title",
                         ),
                         dbc.Container(
@@ -107,7 +107,7 @@ body = dbc.Container(
             dbc.Col(
                 [
                     html.P(
-                        "Densité d'observations en fonction du mois",
+                        "Densité d'observations par jour",
                         className="graph-title",
                     ),
                     dbc.Container(

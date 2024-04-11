@@ -32,7 +32,6 @@ def draw_map(df: pd.DataFrame) -> go.Figure:
     )
 
     fig.update_layout(
-        title_text="2014 US city populations",
         showlegend=False,
         geo=dict(
             scope="usa",
