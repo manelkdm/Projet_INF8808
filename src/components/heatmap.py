@@ -8,7 +8,39 @@ import colorsys
 def draw_heatmap_graph(df) -> go.Figure:  #
     """daily_density = restructure_df(df)"""
     daily_density = restructure_df(df)
-    fig = px.scatter(daily_density, x="day", y="year", color="counts")
+
+    # Custom color gradient with :
+    # https://www.w3schools.com/colors/colors_picker.asp
+    # Basecolor : # 8fbc8f
+    fig = px.scatter(daily_density, x="day", y="year", color="counts", color_continuous_scale=["#dfecdf", "#305030"])
+
+    if daily_density["year"].nunique() <= 10:
+        fig.update_yaxes(tick0=1, dtick=1)
+
+    fig.update_layout(
+        xaxis_title_text="Jour de l'année",
+        yaxis_title_text="Année",
+        coloraxis_colorbar=dict(title="Nombre"),
+    )
+
+    fig.update_xaxes(
+        tickmode="array",
+        tickvals=[0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334],
+        ticktext=[
+            "Jan",
+            "Fév",
+            "Mar",
+            "Avr",
+            "Mai",
+            "Jun",
+            "Jul",
+            "Aoû",
+            "Sep",
+            "Oct",
+            "Nov",
+            "Déc",
+        ],
+    )
 
     fig.update_traces(marker=dict(size=5, symbol="square"))
     return fig
@@ -30,36 +62,9 @@ def restructure_df(df: pd.DataFrame) -> pd.DataFrame:
         yearly_df.groupby(["year", "month", "day"]).size().reset_index(name="counts")
     )
 
-    amount_categories = {
-        "nothing": (0, 0),
-        "low": (1, 5),
-        "medium": (6, 50),
-        "high": (51, float("inf")),
-    }
-
-    yearly_df["category"] = yearly_df["counts"].apply(
-        lambda x: get_category(x, amount_categories)
-    )
+    # Create a new column called "category" that contains the category of the counts
+    # bins = [0, 1, 6, 51, float('inf')]
+    # labels = ['nothing', 'low', 'medium', 'high']
+    # yearly_df['category'] = pd.cut(yearly_df['counts'], bins=bins, labels=labels)
 
     return yearly_df
-
-
-def get_category(amount, amount_categories):
-    for category, (min_amount, max_amount) in amount_categories.items():
-        if min_amount <= amount <= max_amount:
-            return category
-
-    return "nothing"
-
-
-def create_gradient_from_color(color, levels):
-    hex_color = mcolors.hex2color(color)  # Convert hex to rgb
-    hsv_color = colorsys.rgb_to_hsv(*hex_color)  # Convert rgb to hsv
-
-    gradient = []
-    for i in range(levels):
-        lightness = i / levels
-        rgb_color = colorsys.hsv_to_rgb(hsv_color[0], hsv_color[1], lightness)
-        gradient.append(mcolors.rgb2hex(rgb_color))  # Convert rgb back to hex
-
-    return gradient
