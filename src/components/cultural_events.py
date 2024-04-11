@@ -84,7 +84,7 @@ def draw_cultural_events_graph(df: pd.DataFrame, events_db: pd.DataFrame) -> go.
             text=text_str,
             showarrow=False,
             font=dict(size=12),
-            textangle=-90,
+            textangle=90,
             align="right",
         )
 
