@@ -3,6 +3,7 @@ from dash_bootstrap_templates import load_figure_template
 import dash_bootstrap_components as dbc
 from components.filter_box import filter_box_layout
 import preprocess
+import plotly.graph_objects as go
 
 from components.map import draw_map
 from components.cultural_events import draw_cultural_events_graph
@@ -60,13 +61,32 @@ body = dbc.Container(
                 [
                     html.P("Carte des États-Unis", className="graph-title"),
                     dbc.Container(
-                        dcc.Graph(
-                            figure=draw_map(data),
-                            id="map",
-                            style={"height": "100%"},
-                            config=dict(scrollZoom=False),
-                        ),
-                        style={"height": "1000px", "border": "1px solid black"},
+                        [
+                            dbc.Switch(
+                                label="Afficher les reliefs",
+                                id="geo_toggler",
+                                value=False,
+                                style={
+                                    "margin": "10px",
+                                    "margin-bottom": "0",
+                                    "position": "relative",
+                                    "left": "80%",
+                                },
+                            ),
+                            dcc.Graph(
+                                figure=draw_map(data, False),
+                                id="map",
+                                style={
+                                    "height": "750px",
+                                    "width": "100%",
+                                },
+                                config=dict(scrollZoom=False),
+                            ),
+                        ],
+                        style={
+                            "border": "1px solid black",
+                            "min-height": "800px",
+                        },
                     ),
                 ]
             )
@@ -190,15 +210,21 @@ app.layout = dbc.Container([header, filter_box, body])
     Input("shape_filter", "value"),
     Input("duration_filter", "value"),
     Input("decade_filter", "value"),
+    Input("geo_toggler", "value"),
 )
-def update_graphs(shape_filters: list[str], duration_filter: str, decade_filter: str):
+def update_graphs(
+    shape_filters: list[str],
+    duration_filter: str,
+    decade_filter: str,
+    geo_toggle_value: bool,
+):
     filtered_data = data.copy(deep=True)
 
     filtered_data = preprocess.filter_by_shapes(filtered_data, shape_filters)
     filtered_data = preprocess.filter_by_duration(filtered_data, duration_filter)
     filtered_data = preprocess.filter_by_decade(filtered_data, decade_filter)
 
-    map = draw_map(filtered_data)
+    map = draw_map(filtered_data, geo_toggle_value)
     word_frequency = draw_word_frequency_graph(filtered_data)
     sentiment = draw_sentiment_analysis_graph(filtered_data)
     density_month = draw_heatmap_graph(filtered_data)
