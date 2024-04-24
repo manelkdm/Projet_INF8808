@@ -29,6 +29,10 @@ def draw_sentiment_analysis_graph(df) -> go.Figure:
         color_discrete_map=color_map,
     )
 
+    fig.update_traces(
+        hovertemplate="<b>Sentiment:</b> %{label}<br><b>Nombre:</b> %{value:.0f}"
+    )
+
     fig.add_annotation(
         x=1.05,
         y=1,

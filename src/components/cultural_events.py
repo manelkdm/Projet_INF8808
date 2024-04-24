@@ -32,10 +32,11 @@ def draw_cultural_events_graph(df: pd.DataFrame, events_db: pd.DataFrame) -> go.
     fig = px.line(cultural_events_df, x='date_time', y='count')
 
     fig.update_traces(
-    line=dict(
-        color="#8fbc8f",
-        width=3
-        )
+        line=dict(
+            color="#8fbc8f",
+            width=3
+            ),
+        hovertemplate="<b>Date:</b> %{x}<br><b>Nombre:</b> %{y:.0f}"
     )
 
     fig.update_layout(

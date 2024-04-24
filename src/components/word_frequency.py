@@ -15,6 +15,11 @@ def draw_word_frequency_graph(df: pd.DataFrame) -> go.Figure:
     top_words_df = restructure_df(df)
 
     fig = px.bar(top_words_df, x="Count", y="Word", orientation="h", color_discrete_sequence=["#8fbc8f"])
+
+    fig.update_traces(
+        hovertemplate="<b>Mot:</b> <i>%{y}</i><br><b>Nombre:</b> %{x:.0f}"
+    )
+
     fig.update_yaxes(categoryorder="total ascending")
 
     fig.update_layout(

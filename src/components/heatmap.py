@@ -53,7 +53,10 @@ def draw_heatmap_graph(df) -> go.Figure:
         ticktext=MONTHS_ABBREV_FR,
     )
 
-    fig.update_traces(marker=dict(size=5, symbol="square"))
+    fig.update_traces(
+        marker=dict(size=5, symbol="square"),
+        hovertemplate="<b>Jour:</b> %{x}<br><b>Année:</b> %{y}<br><b>Nombre:</b> %{marker.color}",
+        )
     return fig
 
 

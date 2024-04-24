@@ -26,7 +26,7 @@ def draw_density_by_hour_graph(df) -> go.Figure:
     )
 
     fig.update_traces(
-        hovertemplate="<b>Heure:</b> %{theta}h<br><b>Nombre:</b> %{r}"
+        hovertemplate="<b>Heure:</b> %{theta}h<br><b>Nombre:</b> %{r:.0f}"
     )
 
     fig.update_layout(

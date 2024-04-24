@@ -22,7 +22,7 @@ def draw_duration_graph(df: pd.DataFrame) -> go.Figure:
     )
 
     fig.update_traces(
-        hovertemplate="<b>Intervalle de durée :</b> %{x} sec<br><b>Nombre:</b> %{y}"
+        hovertemplate="<b>Intervalle de durée :</b> %{x} sec<br><b>Nombre:</b> %{y:.0f}"
     )
 
 
