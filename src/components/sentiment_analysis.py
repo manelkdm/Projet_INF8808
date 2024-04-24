@@ -33,6 +33,12 @@ def draw_sentiment_analysis_graph(df) -> go.Figure:
         yanchor="bottom",
         font=dict(size=14)
     )
+    
+    for data in fig.data:
+        data.textfont.color = "white"
+        data.textfont.size = 14
+        data.marker.line.color = "white"
+        data.marker.line.width = 1
 
     return fig
 
