@@ -196,7 +196,40 @@ body = dbc.Container(
     ]
 )
 
-app.layout = dbc.Container([header, filter_box, body])
+footer = dbc.Container(
+    [
+        html.H3("Méthodologie"),
+        html.H4("Source de données"),
+        html.P(
+            "Le jeu de données utilisé dans ce projet provient du National UFO Reporting Center (NUFORC). Il a été téléchargé depuis la plateforme data.world. \
+            dans la version produite par Timothy Renner. Le jeu de données original contient des rapports d'observations d'OVNI de 1969 à 2022, en incluant: \
+            la date, l'heure, la durée, la forme, le résumé et la ville de l'observation. Un prétraitement des données a été effectué pour permettre les visualisations présentées."
+            ),
+        html.A("Source du jeu de données", href="https://data.world/timothyrenner/ufo-sightings", target="_blank"),
+        html.P(""),
+        html.H4("Prétraitement des données"),
+        html.P(
+            "Les données affichées ont subi un prétraitement hors-ligne afin d'accélérer les performances de l'application. \
+            En ordre, les étapes de prétraitement sont les suivantes:"
+            ),
+        html.Ol([
+            html.Li("Supprimer les rangées possédant des valeurs manquantes (reste ~74% des données originales)"),
+            html.Li("Conserver uniquement les colonnes d'intérêt"),
+            html.Li("Convertir uniquement les rangées dont le pays est les États-Unis (reste ~71% des données originales)"),
+            html.Li("Convertir les dates en format datetime compatible avec Pandas"),
+            html.Li("Convertir les durées d'observations (langage naturel) en secondes à l'aide d'une heuristique basée sur des mots-clés et des valeurs de conversion"),
+            html.Li("Supprimer les rangées dont la durée d'observation ne peut être déduite (reste ~61% des données originales)"),
+            html.Li("Nettoyer les textes résumés en enlevant les mots vides, la ponctuation et en lemmatisant les mots"),
+            html.Li("Calculer la polarité sentimentale des textes résumés à l'aide de TextBlob"),
+            html.Li("Catégoriser la polarité sentimentale en trois catégories: positif, neutre et négatif (seuil de 0.05)"),
+            html.Li("Sauvegarder les données prétraitées dans un fichier CSV pour une utilisation plus rapide dans l'application"),
+        ]),
+
+    ],
+    style={"textAlign": "left", "margin": "40px"},
+)
+
+app.layout = dbc.Container([header, filter_box, body, footer])
 
 
 @app.callback(

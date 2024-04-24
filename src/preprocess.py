@@ -77,7 +77,9 @@ def preprocess(df: pd.DataFrame) -> pd.DataFrame:
     stop_words = set(stopwords.words("english"))
 
     # drop the rows with missing values
+    print(f"ORIGINAL There are n rows = {df.shape[0]}")
     df = df.dropna()
+    print(f"DROPNA There are n rows = {df.shape[0]}")
 
     #  keep the columns that are needed
     COLUMNS_TO_KEEP = ["summary", "country", "city", "state", "date_time", "shape", "duration", "city_latitude","city_longitude"]
@@ -87,6 +89,8 @@ def preprocess(df: pd.DataFrame) -> pd.DataFrame:
     countries = ["USA", "usa", "USAv", "Usa", "USAUSA", "U", "Untied States of America"]
     df = df[df["country"].isin(countries)]
     df = df.drop("country", axis=1)
+    print(f"USA-ONLY There are n rows = {df.shape[0]}")
+
 
     # Cast the date_time column to a format dd-mm-yyyy hh:mm
     df["date_time"] = pd.to_datetime(df["date_time"], errors="coerce")
@@ -94,6 +98,7 @@ def preprocess(df: pd.DataFrame) -> pd.DataFrame:
     # Convert the duration (string) to seconds (int)
     df["duration"] = df["duration"].apply(lambda x: convert_to_seconds(x))
     df = df.dropna(subset=["duration"])
+    print(f"DROP-DUR There are n rows = {df.shape[0]}")
 
     # Convert the shape to lowercase and keep only the primary shapes
     primary_shapes = ["light", "circle", "triangle", "fireball"]
