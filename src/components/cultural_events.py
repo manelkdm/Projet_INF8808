@@ -103,9 +103,7 @@ def draw_cultural_events_graph(df: pd.DataFrame, events_db: pd.DataFrame) -> go.
 
 def restructure_df(df: pd.DataFrame) -> pd.DataFrame:
 
-    cultural_events_df = df.copy()
-    cultural_events_df = cultural_events_df.groupby(cultural_events_df["date_time"].dt.to_period("M")).size().reset_index(name='count')
-
+    cultural_events_df = df.groupby(df["date_time"].dt.to_period("M")).size().reset_index(name='count')
     return cultural_events_df
 
 
@@ -116,6 +114,5 @@ def get_mid_date(row) -> datetime:
     date_end = datetime.strptime(row["to"], date_format)
 
     date_mid = date_start + (date_end - date_start) / 2
-
 
     return date_mid

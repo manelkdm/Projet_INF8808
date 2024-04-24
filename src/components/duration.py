@@ -54,22 +54,10 @@ def draw_duration_graph(df: pd.DataFrame) -> go.Figure:
 
 def restructure_df(df: pd.DataFrame) -> pd.DataFrame:
 
-    duration_df = df.copy()
-    duration_df = duration_df[["duration"]]
+    # Deep copy the duration column
+    duration_df = df[["duration"]].copy(deep=True)
 
-    # TODO: remove this at the end
-    # find the 10% and 90% quantile
-    # q10 = duration_df["duration"].quantile(0.1)
-    # q90 = duration_df["duration"].quantile(0.9)
-
-    # print("-" * 100)
-    # print(f"10% quantile: {q10} - 90% quantile: {q90}")
-    # print("-" * 100)
     # Log base 2 transformation
     duration_df["log_duration"] = duration_df["duration"].apply(lambda x: np.log2(x))
-
-    # drop all duration > 2000
-    # duration_df = duration_df[duration_df["duration"] < 2000]
-
 
     return duration_df

@@ -61,13 +61,7 @@ state_centroids = {
 
 def draw_map(df: pd.DataFrame, toggle_value: bool) -> go.Figure:
 
-    df_by_city = (
-        df.groupby(["city_longitude", "city_latitude", "city"])
-        .size()
-        .reset_index(name="count")
-    )
-
-    df_by_city.sort_values(by="count", ascending=False, inplace=True)
+    df_by_city = restructure_df(df)
 
     if len(df_by_city) > 1500:
         df_by_city = df_by_city[0:1500]
@@ -159,3 +153,17 @@ def draw_map(df: pd.DataFrame, toggle_value: bool) -> go.Figure:
     )
 
     return fig
+
+
+def restructure_df(df: pd.DataFrame) -> pd.DataFrame:
+
+    df_by_city = (
+        df.groupby(["city_longitude", "city_latitude", "city"])
+        .size()
+        .reset_index(name="count")
+    )
+
+    df_by_city.sort_values(by="count", ascending=False, inplace=True)
+
+    return df_by_city
+

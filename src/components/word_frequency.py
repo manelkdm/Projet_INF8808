@@ -25,9 +25,8 @@ def restructure_df(df: pd.DataFrame) -> pd.DataFrame:
     word_counts = Counter(all_words)
 
     # Get the top 10 most common words and their counts
-    most_common_words = word_counts.most_common(10)
-
     # Convert to DataFrame
+    most_common_words = word_counts.most_common(10)
     top_words_df = pd.DataFrame(most_common_words, columns=["Word", "Count"])
 
     return top_words_df

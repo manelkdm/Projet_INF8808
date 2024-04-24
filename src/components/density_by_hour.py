@@ -49,16 +49,16 @@ def restructure_df(df: pd.DataFrame) -> pd.DataFrame:
 
     ANGLE_PER_HOUR = 360 / 24
 
-    # Create a deep copy of the df called hourly_df with the hour column
-    hourly_df = df.copy()
+    # Deep copy only the date_time column
+    hourly_df = df[['date_time']].copy(deep=True)
     hourly_df["hour"] = hourly_df["date_time"].dt.hour
 
-    # drop all columns except "hour", add a column "frequency" that counts the number of observations for each hour
+    # Drop all columns except "hour", add a column "frequency" that counts the number of observations for each hour
     hourly_df = hourly_df[["hour"]]
     hourly_df = hourly_df.groupby(["hour"]).size().reset_index(name="frequency")
     hourly_df["angle"] = hourly_df["hour"] * ANGLE_PER_HOUR
 
-    # add a transformed frequency column : log_frequency and sqrt_frequency
+    # Add a transformed frequency column : log_frequency and sqrt_frequency
     hourly_df["log_frequency"] = np.log(hourly_df["frequency"])
     hourly_df["sqrt_frequency"] = np.sqrt(hourly_df["frequency"])
 

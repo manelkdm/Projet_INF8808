@@ -25,7 +25,7 @@ def draw_heatmap_graph(df) -> go.Figure:  #
 
     fig.update_xaxes(
         tickmode="array",
-        tickvals=[0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334],
+        tickvals=[0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334], # Starting day of the year for each month
         ticktext=[
             "Jan",
             "Fév",
@@ -48,23 +48,10 @@ def draw_heatmap_graph(df) -> go.Figure:  #
 
 def restructure_df(df: pd.DataFrame) -> pd.DataFrame:
 
-    # Create a deep copy of the df called yearly_df
-    yearly_df = df.copy()
-
-    # Create a new column called "year" that contains the year of the date_time column
-    yearly_df["year"] = yearly_df["date_time"].dt.year
-    yearly_df["month"] = yearly_df["date_time"].dt.month
-    yearly_df["day"] = yearly_df["date_time"].dt.day_of_year
-
-    # drop all columns except "year" and "month"
-    yearly_df = yearly_df[["year", "month", "day"]]
-    yearly_df = (
-        yearly_df.groupby(["year", "month", "day"]).size().reset_index(name="counts")
-    )
-
-    # Create a new column called "category" that contains the category of the counts
-    # bins = [0, 1, 6, 51, float('inf')]
-    # labels = ['nothing', 'low', 'medium', 'high']
-    # yearly_df['category'] = pd.cut(yearly_df['counts'], bins=bins, labels=labels)
+    yearly_df = df.groupby([
+        df['date_time'].dt.year.rename('year'),
+        df['date_time'].dt.month.rename('month'),
+        df['date_time'].dt.day_of_year.rename('day')
+    ]).size().reset_index(name='counts')
 
     return yearly_df
