@@ -121,7 +121,9 @@ def draw_map(df: pd.DataFrame, toggle_value: bool) -> go.Figure:
                 lon=df_by_city["city_longitude"],
                 lat=df_by_city["city_latitude"],
                 text=df_by_city["city"],
+                customdata=df_by_city["count"],
                 mode="markers",
+                hovertemplate="<b>%{text}</b><br>Nombre d'observations: %{customdata} <br>lon: %{lon}, lat: %{lat} <extra></extra>",
                 marker=dict(
                     size=df_by_city["count"] * 1.5,
                     color="ForestGreen",
