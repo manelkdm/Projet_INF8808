@@ -25,6 +25,10 @@ def draw_density_by_hour_graph(df) -> go.Figure:
         start_angle=90,
     )
 
+    fig.update_traces(
+        hovertemplate="<b>Heure:</b> %{theta}h<br><b>Nombre:</b> %{r}"
+    )
+
     fig.update_layout(
         polar=dict(
             angularaxis=dict(

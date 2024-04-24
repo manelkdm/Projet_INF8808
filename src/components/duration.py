@@ -18,7 +18,13 @@ def draw_duration_graph(df: pd.DataFrame) -> go.Figure:
         x="log_duration",
         nbins=50,
         color_discrete_sequence=["#8fbc8f"],
+        hover_data={"log_duration": False, "duration": True},
     )
+
+    fig.update_traces(
+        hovertemplate="<b>Intervalle de durée :</b> %{x} sec<br><b>Nombre:</b> %{y}"
+    )
+
 
     # Create custom tick values for the x-axis
     second_vales = [1, 10, 30, 60, 5*60, 10*60, 30*60, 60*60, 24*60*60, 7*24*60*60, 30*24*60*60, 365*24*60*60]
@@ -44,6 +50,7 @@ def restructure_df(df: pd.DataFrame) -> pd.DataFrame:
 
     # Deep copy the duration column and apply a log2 transformation
     duration_df = df[["duration"]].copy(deep=True)
-    duration_df["log_duration"] = duration_df["duration"].apply(lambda x: np.log2(x))
+    #duration_df["log_duration"] = duration_df["duration"].apply(lambda x: np.log2(x))
+    duration_df["log_duration"] = np.log2(duration_df["duration"])
 
     return duration_df
