@@ -7,6 +7,7 @@ from nltk.stem import WordNetLemmatizer
 import zipfile
 import csv
 import os
+from preprocess_constants import TIME_KEYWORDS, TIME_VALUES
 
 
 def load_raw_data(zip_file_path="assets/data/nuforc_reports.zip") -> pd.DataFrame:
@@ -20,7 +21,6 @@ def load_raw_data(zip_file_path="assets/data/nuforc_reports.zip") -> pd.DataFram
 
 def load_data() -> pd.DataFrame:
 
-    # load the data
     df = pd.read_csv("assets/data/processed_data.csv")
 
     # Convert columns to the right type
@@ -37,6 +37,11 @@ def load_events() -> pd.DataFrame:
 
 
 def preprocess_raw_text(text: str, stop_words, lemmatizer) -> str:
+    """
+    This function preprocesses the text by removing stopwords, punctuation, and lemmatizing the words.
+
+    For example, the text "I am running." will be transformed into "run".
+    """
 
     # Preprocess the text
     words = word_tokenize(text)
@@ -50,17 +55,19 @@ def preprocess_raw_text(text: str, stop_words, lemmatizer) -> str:
 
 
 def sentiment_polarity(text: str) -> str:
+    """
+    This function calculates the sentiment polarity of the text using TextBlob.
+    """
     blob = TextBlob(text)
     return blob.sentiment.polarity
 
 
-def categorize_sentiment(s: float, treshold=0.05) -> str:
-    if s <= -treshold:
-        return "négatif"
-    if s >= treshold:
-        return "positif"
-
-    return "neutre"
+def categorize_sentiment(s: float, threshold=0.05) -> str:
+    """
+    This function categorizes the sentiment polarity into three categories: positive, negative, or neutral.
+    Based on a given threshold, the default threshold is 0.05.
+    """
+    return "négatif" if s <= -threshold else "positif" if s >= threshold else "neutre"
 
 
 def preprocess(df: pd.DataFrame) -> pd.DataFrame:
@@ -73,22 +80,10 @@ def preprocess(df: pd.DataFrame) -> pd.DataFrame:
     df = df.dropna()
 
     #  keep the columns that are needed
-    df = df[
-        [
-            "summary",
-            "country",
-            "city",
-            "state",
-            "date_time",
-            "shape",
-            "duration",
-            # "text",
-            "city_latitude",
-            "city_longitude",
-        ]
-    ]
+    COLUMNS_TO_KEEP = ["summary", "country", "city", "state", "date_time", "shape", "duration", "city_latitude","city_longitude"]
+    df = df[COLUMNS_TO_KEEP]
 
-    # Keep only the rows where the country is in a list
+    # Keep only the rows where the country is USA (and variations of USA)
     countries = ["USA", "usa", "USAv", "Usa", "USAUSA", "U", "Untied States of America"]
     df = df[df["country"].isin(countries)]
     df = df.drop("country", axis=1)
@@ -96,17 +91,16 @@ def preprocess(df: pd.DataFrame) -> pd.DataFrame:
     # Cast the date_time column to a format dd-mm-yyyy hh:mm
     df["date_time"] = pd.to_datetime(df["date_time"], errors="coerce")
 
-    # convert the duration into seconds
+    # Convert the duration (string) to seconds (int)
     df["duration"] = df["duration"].apply(lambda x: convert_to_seconds(x))
     df = df.dropna(subset=["duration"])
 
-    # convert the shape to lowercase
+    # Convert the shape to lowercase and keep only the primary shapes
     primary_shapes = ["light", "circle", "triangle", "fireball"]
     df["shape"] = df["shape"].apply(lambda x: x.lower())
     df["shape"] = df["shape"].apply(lambda x: x if x in primary_shapes else "other")
 
     # Sentiment analysis
-
     # Remove all stop words from the summary column
     lemmatizer = WordNetLemmatizer()
     df["summary"] = df["summary"].apply(preprocess_raw_text, stop_words=stop_words, lemmatizer=lemmatizer)
@@ -119,8 +113,6 @@ def preprocess(df: pd.DataFrame) -> pd.DataFrame:
     df["sentiment"] = df["sentiment"].apply(lambda x: categorize_sentiment(x))
 
     # Save the processed CSV to assets/data
-
-    # delete if exists
     if os.path.exists("assets/data/processed_data.csv"):
         os.remove("assets/data/processed_data.csv")
 
@@ -131,56 +123,21 @@ def preprocess(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def convert_to_seconds(duration) -> float:
+    """
+    This function converts a duration string to seconds.
 
-    # First we split the duration by space
+    Since the duration description are full of typos and inconsistencies, we need to preprocess the data before converting it to seconds.
+    We first look for specific keywords (e.g. "s", "m", "h", "d", "w", "mo", "y") and then convert the duration to seconds. A manual inspection
+    of was performed to identify the most common keywords and their corresponding values in seconds.
+
+    In cases where, no duration could be extracted, the function returns None, which will be later dropped from the DataFrame.
+
+    Overall this implementation successfully salvages >90% of the duration data.
+    """
+
+    # Convert the duration to lowercase and remove all non-alphanumeric characters
     duration = duration.lower()
-    # duration = duration.split()
-
-    # remove all non alphanumeric characters
     duration = "".join([c for c in duration if c.isalnum() or c.isspace() or c == "-"])
-
-    # Then we lowercase the duration
-
-    time_keywords = {
-        "s": "s",
-        "se": "s",
-        "sec": "s",
-        "second": "s",
-        "seconds": "s",
-        "m": "m",
-        "mi": "m",
-        "mii": "m",
-        "min": "m",
-        "mins": "m",
-        "mon": "m",
-        "mnutes": "m",
-        "kinutes": "m",
-        "ninutes": "m",
-        "minute": "m",
-        "minutes": "m",
-        "h": "h",
-        "hr": "h",
-        "hrs": "h",
-        "hour": "h",
-        "hours": "h",
-        "day": "d",
-        "days": "d",
-        "week": "w",
-        "month": "mo",
-        "months": "mo",
-        "yrs": "y",
-        "year": "y",
-    }
-
-    time_values = {
-        "s": 1,
-        "m": 60,
-        "h": 60 * 60,
-        "d": 24 * 60 * 60,
-        "w": 7 * 24 * 60 * 60,
-        "mo": 30 * 24 * 60 * 60,
-        "y": 365 * 24 * 60 * 60,
-    }
 
     # find if there is any number in the duration
     has_number = False
@@ -193,12 +150,12 @@ def convert_to_seconds(duration) -> float:
     has_keyword = False
 
     for word in duration.split():
-        if word in time_keywords:
+        if word in TIME_KEYWORDS:
             has_keyword = True
             break
 
     if has_keyword and has_number:
-        duration_1 = [time_keywords.get(word, word) for word in duration.split()]
+        duration_1 = [TIME_KEYWORDS.get(word, word) for word in duration.split()]
 
         # Find all occurences of X-Y where X and Y are numbers
         for i, dur in enumerate(duration_1):
@@ -217,7 +174,7 @@ def convert_to_seconds(duration) -> float:
                     duration_1[i] = str(mean)
 
         duration_2 = [
-            word for word in duration_1 if word.isnumeric() or word in time_values
+            word for word in duration_1 if word.isnumeric() or word in TIME_VALUES
         ]
 
         # print(f"{d_1:<20} -> {d_2:<20}")
@@ -228,11 +185,11 @@ def convert_to_seconds(duration) -> float:
             val_1 = duration_2[i]
             val_2 = duration_2[i + 1]
 
-            if val_1.isnumeric() and val_2 in time_values:
+            if val_1.isnumeric() and val_2 in TIME_VALUES:
 
                 if val_1 == "2½":
                     val_1 = 2
-                total_seconds += int(val_1) * time_values[val_2]
+                total_seconds += int(val_1) * TIME_VALUES[val_2]
 
         return total_seconds if total_seconds > 0 else None
 
@@ -281,17 +238,3 @@ def filter_by_decade(df: pd.DataFrame, decade: str = "Toutes") -> pd.DataFrame:
     return df[
         (df["date_time"].dt.year >= min_year) & (df["date_time"].dt.year <= max_year)
     ]
-
-
-def aggregate_by_hour(df: pd.DataFrame) -> pd.DataFrame:
-    # Create a deep copy of the df called hourly_df
-    hourly_df = df.copy()
-
-    # Create a new column called "hour" that contains the hour of the date_time column
-    hourly_df["hour"] = hourly_df["date_time"].dt.hour
-
-    # drop all columns except "hour"
-    hourly_df = hourly_df[["hour"]]
-    hourly_df = hourly_df.groupby("hour").size().reset_index(name="counts")
-
-    return hourly_df

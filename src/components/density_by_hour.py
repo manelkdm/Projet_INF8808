@@ -5,9 +5,16 @@ import numpy as np
 
 
 def draw_density_by_hour_graph(df) -> go.Figure:
-    df = restructure_df(df)
+    """
+    This function draws a polar bar graph of the number of observations by hour of the day on a 24-hour clock
+    Since the data is from 0 to 23, each value gets myltiplied by 15 to get the angle in degrees (0 to 360).
+    
+    Midnight is at the 90° angle, and the graph is drawn clockwise.
 
-    # The radius "r" can be any of the following: "frequency", "log_frequency", "sqrt_frequency"
+    The radius "r" can be any of the following: "frequency", "log_frequency", "sqrt_frequency" to represent the data differently.
+    """
+
+    df = restructure_df(df)
 
     fig = px.bar_polar(
         df,
@@ -25,6 +32,7 @@ def draw_density_by_hour_graph(df) -> go.Figure:
                 tickvals=np.arange(24) * 15,
                 ticktext=[str(i) for i in range(24)],
             ),
+            # Radial axis (radius = frequency)
             radialaxis=dict(
                 title = dict(text="Nombre", font=dict(size=14)),
                 tickangle=90,
@@ -32,6 +40,7 @@ def draw_density_by_hour_graph(df) -> go.Figure:
         )
     )
 
+    # Custom annotation for the angular axis (angle = hour)
     fig.add_annotation(
         text="Heure de la journée",
         x=0.5,

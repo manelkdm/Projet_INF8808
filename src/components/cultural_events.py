@@ -4,6 +4,16 @@ import plotly.express as px
 from datetime import datetime, timedelta
 
 def draw_cultural_events_graph(df: pd.DataFrame, events_db: pd.DataFrame) -> go.Figure:
+    """
+    This function draws a line graph of the number of observations over time
+    with vertical rectangles representing cultural events colored by their given category (Film/Série, Mission Spatiale, Autres)
+
+    Each cultural event is represented by a vertical rectangle spanning from the start date to the end date, representing the duration of influence of the event.
+    For example, movies where usually given a -2/+2 months of influence to account for the pre-release and post-release period. Same for space missions.
+
+    Unsual events are also represented, such as the release of classified documents, or the discovery of a new exoplanet. These events have an influence period starting from the date of the event,
+    since they cannot be predicted in advance, in contrast to movies or space missions.
+    """
 
     cultural_events_df = restructure_df(df)
 

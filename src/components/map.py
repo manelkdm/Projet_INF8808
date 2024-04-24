@@ -2,7 +2,11 @@ import plotly.graph_objects as go
 import plotly.express as px
 import pandas as pd
 
+"""
+This dictionary contains the latitude and longitude of the centroids of each state in the United States.
 
+SOURCE: https://developers.google.com/public-data/docs/canonical/states_csv
+"""
 state_centroids = {
     "AK": {"lat": 63.588753, "lon": -154.493062},
     "AL": {"lat": 32.318231, "lon": -86.902298},
@@ -60,6 +64,14 @@ state_centroids = {
 
 
 def draw_map(df: pd.DataFrame, toggle_value: bool) -> go.Figure:
+    """
+    This function draws a map of the United States with the number of observations by city
+    Each city is represented by a circle, the size of the circle represents the number of observations in that city.
+
+    If the toggle_value is True, the map will show a satellite view of the United States instead of the normal map.
+
+    This diminish the impact of lag, only the top 1500 cities are shown on the map. This arbitrary limit was set to improve performance.
+    """
 
     df_by_city = restructure_df(df)
 

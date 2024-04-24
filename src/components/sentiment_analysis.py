@@ -6,8 +6,15 @@ import pandas as pd
 
 def draw_sentiment_analysis_graph(df) -> go.Figure:
 
+    """
+    This function draws a pie chart of the sentiment analysis of the text summary of the observations.
+    
+    There are 3 possible sentiments: "positif", "négatif", "neutre", pre-computed by the sentiment analysis preprocessing step.
+    """
+
     sentiment_df = restructure_df(df)
 
+    # Custom color map for the sentiment categories
     color_map = {
         "positif": "#8fbc8f",
         "négatif": "#bc8f8f",
@@ -46,5 +53,4 @@ def draw_sentiment_analysis_graph(df) -> go.Figure:
 def restructure_df(df: pd.DataFrame) -> pd.DataFrame:
 
     sentiment_df = df.groupby("sentiment").size().reset_index(name="count")
-
     return sentiment_df
