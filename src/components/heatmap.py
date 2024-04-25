@@ -3,20 +3,7 @@ import plotly.express as px
 import pandas as pd
 
 # List of French month abbreviations
-MONTHS_ABBREV_FR = [
-            "Jan",
-            "Fév",
-            "Mar",
-            "Avr",
-            "Mai",
-            "Jun",
-            "Jul",
-            "Aoû",
-            "Sep",
-            "Oct",
-            "Nov",
-            "Déc",
-        ]
+MONTHS_ABBREV_FR = ["Jan", "Fév", "Mar", "Avr", "Mai", "Jun", "Jul", "Aoû", "Sep", "Oct", "Nov", "Déc"]
 
 # Start day of year for each month in a non-leap year
 MONTHS_START_DAY = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334]
@@ -37,8 +24,8 @@ def draw_heatmap_graph(df) -> go.Figure:
     # Basecolor : # 8fbc8f
     fig = px.scatter(daily_density, x="day", y="year", color="counts", color_continuous_scale=["#dfecdf", "#305030"])
 
-    # If a decade was selected in the filter
-    if daily_density["year"].nunique() <= 10:
+    # If any decade was selected, we need to adjust the y-axis ticks (1 tick per year)
+    if daily_density["year"].nunique() <= 15:
         fig.update_yaxes(tick0=1, dtick=1)
 
     fig.update_layout(
@@ -56,7 +43,7 @@ def draw_heatmap_graph(df) -> go.Figure:
     fig.update_traces(
         marker=dict(size=5, symbol="square"),
         hovertemplate="<b>Jour:</b> %{x}<br><b>Année:</b> %{y}<br><b>Nombre:</b> %{marker.color}",
-        )
+    )
     return fig
 
 

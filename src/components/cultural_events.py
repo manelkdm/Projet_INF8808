@@ -1,7 +1,13 @@
 import plotly.graph_objects as go
 import pandas as pd
 import plotly.express as px
-from datetime import datetime, timedelta
+from datetime import datetime
+
+EVENT_CATEGORY_COLORS = {
+    "Film/Série": "deepskyblue",
+    "Mission Spatiale": "darkviolet",
+    "Autres": "grey",
+}
 
 def draw_cultural_events_graph(df: pd.DataFrame, events_db: pd.DataFrame) -> go.Figure:
     """
@@ -33,7 +39,8 @@ def draw_cultural_events_graph(df: pd.DataFrame, events_db: pd.DataFrame) -> go.
 
     fig.update_traces(
         line=dict(
-            color="#8fbc8f",
+            #color="#8fbc8f",
+            color="ForestGreen",
             width=3
             ),
         hovertemplate="<b>Date:</b> %{x}<br><b>Nombre:</b> %{y:.0f}"
@@ -44,70 +51,79 @@ def draw_cultural_events_graph(df: pd.DataFrame, events_db: pd.DataFrame) -> go.
         yaxis_title_text="Nombre d'observations",
     )
 
+    # Remove the grid to make the graph more readable
+    fig.update_xaxes(showgrid=False)
+    fig.update_yaxes(showgrid=False)
+
     y_max = max(cultural_events_df["count"])
-    fig.update_yaxes(range=[0, 1.2 * y_max ])
 
-
-    event_category_colormap = {
-        "Film/Série": "deepskyblue",
-        "Mission Spatiale": "darkviolet",
-        "Autres": "grey",
-    }
+    if year_range <= 10:
+        # Change the maximum y-axis value to make the events labels more visible
+        fig.update_yaxes(range=[0, 1.5 * y_max ])
+    else:
+        # Hide the events labels
+        fig.update_layout(
+            title_text="Sélectionner une décennie pour voir le nom des événements",
+            title_x=0.5,
+            title_font_size=16,
+        )
 
     for i in range(len(events_db)):
         row = events_db.iloc[i]
 
         date_start = row["from"]
         date_end = row["to"]
-        date_mid = get_mid_date(row)
-        color = event_category_colormap[row["category"]]
+        date_mid = compute_middle_date(row)
+        color = EVENT_CATEGORY_COLORS[row["category"]]
 
         # Skip iteration if the date is out of the range
         if date_start < min_date or date_end > max_date:
             continue
+
         fig.add_vrect(
             x0=date_start, x1=date_end,
-            fillcolor=color, opacity=0.5,
+            fillcolor=color, opacity=0.4,
             layer="below", line_width=0,
         )
 
-        # TODO : solve this properly
-        y_coord = 0.9 * y_max
+        y_coord = 0.975 * y_max
 
         # Pad the text with spaces to make it appear at the right position
-        text_str = row["name"].rjust(30)
+        text_str = row["name"].ljust(30)
 
-        # TODO: play with the tick values to make it more readable
-        # if year_range < 3: # 2020 - 2023 : tick every 3 months
-        #     fig.update_xaxes(dtick="M3", tickformat="%b %Y")
-        # elif year_range < 10: # Decade : tick every 1 year
-        #     fig.update_xaxes(dtick="M12", tickformat="%Y")
-        # else: # All : tick every 3 years
-        #     # TODO : tick every 3 years not possible in Plotly ...
-        #     pass
-        #     # fig.update_xaxes(dtick="M12", tickformat="%Y")
+        # Change the tick format depending on the year range (small, decade, all)
+        if year_range < 3: # 2020 - 2023 : tick every 3 months
+            fig.update_xaxes(dtick="M3", tickformat="%b %Y")
+        elif year_range < 15: # Decade : tick every 6 months
+            fig.update_xaxes(dtick="M6", tickformat="%b %Y")
+        else: # All : automatic scaling
+            # TODO : tick every 3 years not possible in Plotly ...
+            pass
 
         fig.update_xaxes(tickangle=90)
 
-        fig.add_annotation(
-            x=date_mid, y=y_coord,
-            xref="x", yref="y",
-            text=text_str,
-            showarrow=False,
-            font=dict(size=12, color="black"),
-            textangle=90,
-            align="right",
-        )
+        # Show the event name if the year range is not the full range
+        if year_range <= 10:
+            fig.add_annotation(
+                x=date_mid, y=y_coord,
+                xref="x", yref="y",
+                text=text_str,
+                showarrow=False,
+                font=dict(size=12, color="black", family="monospace"),
+                textangle=90,
+                align="right",
+            )
 
     # Add dummy traces for legend
-    for category, color in event_category_colormap.items():
+    for category, color in EVENT_CATEGORY_COLORS.items():
         fig.add_trace(go.Scatter(
             x=[None], y=[None],
             mode='markers',
             marker=dict(size=10, color=color),
             showlegend=True,
             name=category,
-        ))
+            )
+        )
 
     return fig
 
@@ -118,7 +134,7 @@ def restructure_df(df: pd.DataFrame) -> pd.DataFrame:
     return cultural_events_df
 
 
-def get_mid_date(row) -> datetime:
+def compute_middle_date(row) -> datetime:
     date_format = "%Y-%m-%d"
 
     date_start = datetime.strptime(row["from"], date_format)
