@@ -89,13 +89,15 @@ def draw_cultural_events_graph(df: pd.DataFrame, events_db: pd.DataFrame) -> go.
             layer="below",
             line_width=0,
         )
-        RESOLUTION = 100
+
         y_limit = int(1.5 * y_max)
+        resolution = int(y_limit / 10)
+
         fig.add_trace(
             go.Scatter(
-                x=[date_mid] * RESOLUTION,
-                y=[i for i in range(0, y_limit, y_limit // RESOLUTION)],
-                customdata=[row["name"]] * RESOLUTION,
+                x=[date_mid] * resolution,
+                y=[i for i in range(0, y_limit, y_limit // resolution)],
+                customdata=[row["name"]] * resolution,
                 opacity=0,
                 showlegend=False,
                 marker=dict(size=10, color=color),
