@@ -9,6 +9,7 @@ EVENT_CATEGORY_COLORS = {
     "Autres": "grey",
 }
 
+
 def draw_cultural_events_graph(df: pd.DataFrame, events_db: pd.DataFrame) -> go.Figure:
     """
     This function draws a line graph of the number of observations over time
@@ -23,8 +24,8 @@ def draw_cultural_events_graph(df: pd.DataFrame, events_db: pd.DataFrame) -> go.
 
     cultural_events_df = restructure_df(df)
 
-    min_year = df['date_time'].dt.year.min()
-    max_year = df['date_time'].dt.year.max()
+    min_year = df["date_time"].dt.year.min()
+    max_year = df["date_time"].dt.year.max()
 
     year_range = max_year - min_year
     # print(f"Year range: {year_range}")
@@ -35,15 +36,15 @@ def draw_cultural_events_graph(df: pd.DataFrame, events_db: pd.DataFrame) -> go.
     min_date = cultural_events_df["date_time"].min()
     max_date = cultural_events_df["date_time"].max()
 
-    fig = px.line(cultural_events_df, x='date_time', y='count')
+    fig = px.line(cultural_events_df, x="date_time", y="count")
 
     fig.update_traces(
         line=dict(
-            #color="#8fbc8f",
+            # color="#8fbc8f",
             color="ForestGreen",
-            width=3
-            ),
-        hovertemplate="<b>Date:</b> %{x}<br><b>Nombre:</b> %{y:.0f}"
+            width=3,
+        ),
+        hovertemplate="<b>Date:</b> %{x}<br><b>Nombre:</b> %{y:.0f}",
     )
 
     fig.update_layout(
@@ -59,11 +60,11 @@ def draw_cultural_events_graph(df: pd.DataFrame, events_db: pd.DataFrame) -> go.
 
     if year_range <= 10:
         # Change the maximum y-axis value to make the events labels more visible
-        fig.update_yaxes(range=[0, 1.5 * y_max ])
+        fig.update_yaxes(range=[0, 1.5 * y_max])
     else:
         # Hide the events labels
         fig.update_layout(
-            title_text="Sélectionner une décennie pour voir le nom des événements",
+            title_text="Positionner le curseur sur un événement pour plus de détails",
             title_x=0.5,
             title_font_size=16,
         )
@@ -81,9 +82,24 @@ def draw_cultural_events_graph(df: pd.DataFrame, events_db: pd.DataFrame) -> go.
             continue
 
         fig.add_vrect(
-            x0=date_start, x1=date_end,
-            fillcolor=color, opacity=0.4,
-            layer="below", line_width=0,
+            x0=date_start,
+            x1=date_end,
+            fillcolor=color,
+            opacity=0.4,
+            layer="below",
+            line_width=0,
+        )
+        RESOLUTION = 100
+        fig.add_trace(
+            go.Scatter(
+                x=[date_mid] * RESOLUTION,
+                y=[i for i in range(0, y_max, y_max // RESOLUTION)],
+                customdata=[row["name"]] * RESOLUTION,
+                opacity=0,
+                showlegend=False,
+                marker=dict(size=10, color=color),
+                hovertemplate="<b>%{customdata}</b><br>%{x}<extra></extra>",
+            )
         )
 
         y_coord = 0.975 * y_max
@@ -92,11 +108,11 @@ def draw_cultural_events_graph(df: pd.DataFrame, events_db: pd.DataFrame) -> go.
         text_str = row["name"].ljust(30)
 
         # Change the tick format depending on the year range (small, decade, all)
-        if year_range < 3: # 2020 - 2023 : tick every 3 months
+        if year_range < 3:  # 2020 - 2023 : tick every 3 months
             fig.update_xaxes(dtick="M3", tickformat="%b %Y")
-        elif year_range < 15: # Decade : tick every 6 months
+        elif year_range < 15:  # Decade : tick every 6 months
             fig.update_xaxes(dtick="M6", tickformat="%b %Y")
-        else: # All : automatic scaling
+        else:  # All : automatic scaling
             # TODO : tick every 3 years not possible in Plotly ...
             pass
 
@@ -105,8 +121,10 @@ def draw_cultural_events_graph(df: pd.DataFrame, events_db: pd.DataFrame) -> go.
         # Show the event name if the year range is not the full range
         if year_range <= 10:
             fig.add_annotation(
-                x=date_mid, y=y_coord,
-                xref="x", yref="y",
+                x=date_mid,
+                y=y_coord,
+                xref="x",
+                yref="y",
                 text=text_str,
                 showarrow=False,
                 font=dict(size=12, color="black", family="monospace"),
@@ -116,12 +134,14 @@ def draw_cultural_events_graph(df: pd.DataFrame, events_db: pd.DataFrame) -> go.
 
     # Add dummy traces for legend
     for category, color in EVENT_CATEGORY_COLORS.items():
-        fig.add_trace(go.Scatter(
-            x=[None], y=[None],
-            mode='markers',
-            marker=dict(size=10, color=color),
-            showlegend=True,
-            name=category,
+        fig.add_trace(
+            go.Scatter(
+                x=[None],
+                y=[None],
+                mode="markers",
+                marker=dict(size=10, color=color),
+                showlegend=True,
+                name=category,
             )
         )
 
@@ -130,7 +150,9 @@ def draw_cultural_events_graph(df: pd.DataFrame, events_db: pd.DataFrame) -> go.
 
 def restructure_df(df: pd.DataFrame) -> pd.DataFrame:
 
-    cultural_events_df = df.groupby(df["date_time"].dt.to_period("M")).size().reset_index(name='count')
+    cultural_events_df = (
+        df.groupby(df["date_time"].dt.to_period("M")).size().reset_index(name="count")
+    )
     return cultural_events_df
 
 
