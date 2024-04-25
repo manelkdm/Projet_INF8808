@@ -24,14 +24,27 @@ def draw_heatmap_graph(df) -> go.Figure:
     # Basecolor : # 8fbc8f
     fig = px.scatter(daily_density, x="day", y="year", color="counts", color_continuous_scale=["#dfecdf", "#305030"])
 
+    # Get unique years to determine the spread in the y-axis
+    years = daily_density["year"].unique()
+    n_years = len(years)
+
+    def height_by_years(n_years):
+        if n_years <= 3: # Special case for 2020-2022 (3 years)
+            return 200
+        elif n_years <= 11: # For each decade
+            return 300
+        else: # All years
+            return 400
+
     # If any decade was selected, we need to adjust the y-axis ticks (1 tick per year)
-    if daily_density["year"].nunique() <= 15:
+    if n_years <= 11:
         fig.update_yaxes(tick0=1, dtick=1)
 
     fig.update_layout(
         xaxis_title_text="Jour de l'année",
         yaxis_title_text="Année",
         coloraxis_colorbar=dict(title="Nombre"),
+        height=height_by_years(n_years),
     )
 
     fig.update_xaxes(
@@ -44,6 +57,7 @@ def draw_heatmap_graph(df) -> go.Figure:
         marker=dict(size=5, symbol="square"),
         hovertemplate="<b>Jour:</b> %{x}<br><b>Année:</b> %{y}<br><b>Nombre:</b> %{marker.color}",
     )
+
     return fig
 
 
