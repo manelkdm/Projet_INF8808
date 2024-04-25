@@ -59,7 +59,8 @@ def sentiment_polarity(text: str) -> str:
     This function calculates the sentiment polarity of the text using TextBlob.
     """
     blob = TextBlob(text)
-    return blob.sentiment.polarity
+    polarity = blob.sentiment.polarity
+    return polarity
 
 
 def categorize_sentiment(s: float, threshold=0.05) -> str:
@@ -71,26 +72,44 @@ def categorize_sentiment(s: float, threshold=0.05) -> str:
 
 
 def preprocess(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    This is the main preprocessing function that cleans the data and saves it to a new CSV file.
+
+    The following steps are performed:
+    1. Drop missing values
+    2. Keep only the columns that are needed
+    3. Keep only the rows where the country is USA (and variations of USA)
+    4. Cast the date_time column to a format dd-mm-yyyy hh:mm
+    5. Convert the duration (string) to seconds (int) using a custom heuristic
+    6. Convert the shape to lowercase and keep only the primary shapes
+    7. Sentiment analysis on the summary column
+    8. Apply a threshold to the sentiment column, splitting it into three categories    
+    9. Save the processed CSV to assets/data
+    """
 
     # download the stopwords
     nltk.download('stopwords')
     stop_words = set(stopwords.words("english"))
 
     # drop the rows with missing values
-    print(f"ORIGINAL There are n rows = {df.shape[0]}")
+    n_rows_original = df.shape[0]
+    print(f"Original dataset has {n_rows_original} rows")
     df = df.dropna()
-    print(f"DROPNA There are n rows = {df.shape[0]}")
+
+    percent = df.shape[0] / n_rows_original * 100
+    print(f"After dropping missing values, there are {df.shape[0]} rows ({percent:.2f}% of original)")
 
     #  keep the columns that are needed
-    COLUMNS_TO_KEEP = ["summary", "country", "city", "state", "date_time", "shape", "duration", "city_latitude","city_longitude"]
-    df = df[COLUMNS_TO_KEEP]
+    columns_to_keep = ["summary", "country", "city", "state", "date_time", "shape", "duration", "city_latitude","city_longitude"]
+    df = df[columns_to_keep]
 
     # Keep only the rows where the country is USA (and variations of USA)
-    countries = ["USA", "usa", "USAv", "Usa", "USAUSA", "U", "Untied States of America"]
-    df = df[df["country"].isin(countries)]
+    usa_name_variants = ["USA", "usa", "USAv", "Usa", "USAUSA", "U", "Untied States of America"]
+    df = df[df["country"].isin(usa_name_variants)]
     df = df.drop("country", axis=1)
-    print(f"USA-ONLY There are n rows = {df.shape[0]}")
-
+    
+    percent = df.shape[0] / n_rows_original * 100
+    print(f"After keeping only USA, there are {df.shape[0]} rows ({percent:.2f}% of original)")
 
     # Cast the date_time column to a format dd-mm-yyyy hh:mm
     df["date_time"] = pd.to_datetime(df["date_time"], errors="coerce")
@@ -98,18 +117,20 @@ def preprocess(df: pd.DataFrame) -> pd.DataFrame:
     # Convert the duration (string) to seconds (int)
     df["duration"] = df["duration"].apply(lambda x: convert_to_seconds(x))
     df = df.dropna(subset=["duration"])
-    print(f"DROP-DUR There are n rows = {df.shape[0]}")
+    
+    percent = df.shape[0] / n_rows_original * 100
+    print(f"After converting the duration to seconds, there are {df.shape[0]} rows ({percent:.2f}% of original)")
 
     # Convert the shape to lowercase and keep only the primary shapes
     primary_shapes = ["light", "circle", "triangle", "fireball"]
     df["shape"] = df["shape"].apply(lambda x: x.lower())
     df["shape"] = df["shape"].apply(lambda x: x if x in primary_shapes else "other")
 
-    # Sentiment analysis
+    # ============== Sentiment analysis ==============
     # Remove all stop words from the summary column
     lemmatizer = WordNetLemmatizer()
-    df["summary"] = df["summary"].apply(preprocess_raw_text, stop_words=stop_words, lemmatizer=lemmatizer)
     df["sentiment"] = df["summary"].apply(sentiment_polarity)
+    df["summary"] = df["summary"].apply(preprocess_raw_text, stop_words=stop_words, lemmatizer=lemmatizer)
 
     # Apply a threshold to the sentiment column, splitting it into three categories
     # [-1, -T] -> "negative"
