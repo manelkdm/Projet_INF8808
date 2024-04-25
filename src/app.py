@@ -224,7 +224,21 @@ footer = dbc.Container(
             html.Li("Catégoriser la polarité sentimentale en trois catégories: positif, neutre et négatif (seuil de 0.05)"),
             html.Li("Sauvegarder les données prétraitées dans un fichier CSV pour une utilisation plus rapide dans l'application"),
         ]),
-
+        html.H4("Visualisations"),
+        # Explication rapide des transformations effectuées pour chaque graphique
+        html.P("Les visualisations présentées dans cette application sont les suivantes:"),
+        html.Ol([
+            html.Li("Carte des États-Unis: Les observations sont regroupées par ville et affichées sur une carte des États-Unis et les premières 1500 villes sont affichées.\
+                Les reliefs peuvent être affichés pour une meilleure visualisation."),
+            html.Li("Top 10 Mots Fréquemment Utilisés: Les mots les plus fréquemment utilisés dans les résumés d'observations sont affichés sans les mots vides et la ponctuation."),
+            html.Li("Analyse de Sentiment: La polarité sentimentale des résumés d'observations est calculée et affichée sous forme de barplot en trois catégories: positif, neutre et négatif. \
+                    La polarité est calculée à l'aide de TextBlob."),
+            html.Li("Densité d'observations par jour: La densité d'observations regroupées par mois et année est affichée sous forme de heatmap."),
+            html.Li("Densité d'observation par heure de la journée: La densité d'observations regroupées par heure de la journée est affichée sous forme de radar graph."),
+            html.Li("Durée des observations: La durée des observations est affichée sous forme d'histogramme avec une échelle logarithmique (base 2) sur l'axe des x."),
+            html.Li("Influence d'événements culturels marquants: Les observations sont regroupées par mois et année et affichées sous forme de lineplot. \
+                    Des bandes colorées représentent des événements culturels marquants qui pourraient influencer le nombre d'observations."),
+    ],),
     ],
     style={"textAlign": "left", "margin": "40px"},
 )
