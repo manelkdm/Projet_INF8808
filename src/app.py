@@ -1,3 +1,9 @@
+# This file contains the main code for the Dash application. It starts by loading the data or preprocessing it, and creates the layout of the application.
+# It also contains the callbacks for the filters and the graphs.
+#
+# Authors: Simon Haché, Julien Milosz, Manel Keddam
+# Course: INF8808
+
 from dash import Dash, html, dcc, callback, Output, Input
 from dash_bootstrap_templates import load_figure_template
 import dash_bootstrap_components as dbc
@@ -13,6 +19,12 @@ from components.sentiment_analysis import draw_sentiment_analysis_graph
 from components.heatmap import draw_heatmap_graph
 from components.word_frequency import draw_word_frequency_graph
 
+
+# Preprocessing stage
+
+# If RUN_PREPROCESS is set to True, the raw data will be preprocessed and saved to a CSV file
+# This operation can take a few minutes, therefore it is recommended to set it to False after the first run
+# The saved preprocessed data (CSV file) and will be loaded for more efficient use in the application.
 RUN_PREPROCESS = False
 
 if RUN_PREPROCESS:
@@ -23,6 +35,7 @@ else:
 
 events_db = preprocess.load_events()
 
+# Dash application setup
 app = Dash(__name__, title="OVNI", external_stylesheets=[dbc.themes.LUX])
 server = app.server
 app._favicon = "images/ufo.png"
@@ -34,7 +47,7 @@ header = dbc.Container(
         html.Img(src="assets/images/ufo.png", style={"height": "100px"}),
         html.H1("Observations d'OVNI au états-unis"),
         html.P("Simon Haché, Julien Milosz, Manel Keddam"),
-        html.P("Final 1.0.1"),
+        html.P("Final 1.0.3"),
     ],
     style={"textAlign": "center", "margin": "40px"},
 )
