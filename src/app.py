@@ -34,7 +34,7 @@ header = dbc.Container(
         html.Img(src="assets/images/ufo.png", style={"height": "100px"}),
         html.H1("Observations d'OVNI au états-unis"),
         html.P("Simon Haché, Julien Milosz, Manel Keddam"),
-        html.P("Beta 0.1.1"),
+        html.P("Final 1.0.1"),
     ],
     style={"textAlign": "center", "margin": "40px"},
 )
